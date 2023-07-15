@@ -1,4 +1,4 @@
-package com.example.natmisic.ui.theme
+package com.example.natmisic.theme
 
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Shapes
