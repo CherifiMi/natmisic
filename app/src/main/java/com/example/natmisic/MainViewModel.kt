@@ -24,6 +24,6 @@ class MainViewModel @Inject constructor(
 ) : ViewModel() {
     // TODO: run in flash screen
     fun hasRootFolder(): Boolean {
-        return useCase.getRootFolderName() != ""
+        return useCase.getDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY) != null
     }
 }

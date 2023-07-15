@@ -1,27 +1,41 @@
 package com.example.natmisic.feature.presentation.home
 
-import android.text.Html
 import android.util.Log
-import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import com.example.natmisic.core.util.DataStoreKeys
 import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import java.io.File
 import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val useCase: UseCases,
 ) : ViewModel() {
+    //val books: ImmutableMap<BookOverviewCategory, List<BookOverviewItemViewState>>,
     fun getRootFolderName(): String {
-        return useCase.getRootFolderName()
+        return useCase.getDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY)?:""
     }
 
+
 }
+
+/*
+data class BookOverviewItemViewState(
+    val name: String,
+    val author: String?,
+    val cover: ImmutableFile?,
+    val progress: Float,
+    val id: BookId,
+    val remainingTime: String,
+)
+fun Book.progress(): Float {
+    val globalPosition = position
+    val totalDuration = duration
+    val progress = globalPosition.toFloat() / totalDuration.toFloat()
+    if (progress < 0F) {
+        Logger.w("Couldn't determine progress for book=$this")
+    }
+    return progress.coerceIn(0F, 1F)
+}
+*/

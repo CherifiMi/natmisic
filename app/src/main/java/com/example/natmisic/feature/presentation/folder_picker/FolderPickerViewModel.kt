@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.natmisic.core.util.DataStoreKeys
+import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
@@ -15,15 +16,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class FolderPickerViewModel @Inject constructor(
-    //private val noteUseCase: NoteUseCase
-    private val dataStore: DataStore<Preferences>
+    private val useCase: UseCases
 ) : ViewModel() {
-    fun saveRootFolderName(s: String){
-        viewModelScope.launch {
-            dataStore.edit {
-                it[DataStoreKeys.ROOT_FOLDER_KEY] = s
-            }
-        }
+    fun saveRootFolderName(s: String) {
+        useCase.setDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY, s)
     }
-
 }

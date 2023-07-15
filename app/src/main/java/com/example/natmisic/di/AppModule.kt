@@ -5,7 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
-import com.example.natmisic.feature.domain.use_case.GetRootFolderName
+import com.example.natmisic.feature.domain.use_case.GetDataStoreItem
+import com.example.natmisic.feature.domain.use_case.SetDataStoreItem
 import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.Module
 import dagger.Provides
@@ -34,7 +35,8 @@ object AppModule {
         dataStore: DataStore<Preferences>
         //repository: Repository
     ) = UseCases(
-        getRootFolderName = GetRootFolderName(dataStore)
+        getDataStoreItem = GetDataStoreItem(dataStore),
+        setDataStoreItem = SetDataStoreItem(dataStore)
     )
 }
 
