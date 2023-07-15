@@ -1,29 +1,28 @@
-package com.example.natmisic.feature.presentation.folder_picker
+package com.example.natmisic.feature.presentation.home
 
 import android.text.Html
 import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.natmisic.core.util.DataStoreKeys
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import javax.inject.Inject
 
 @HiltViewModel
-class FolderPickerViewModel @Inject constructor(
+class HomeViewModel @Inject constructor(
     //private val noteUseCase: NoteUseCase
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
-    fun saveRootFolderName(s: String){
-        viewModelScope.launch {
-            dataStore.edit {
-                it[DataStoreKeys.ROOT_FOLDER_KEY] = s
-            }
-        }
+    fun getRootFolderName(): String = runBlocking {
+        dataStore.data.map {
+            it[DataStoreKeys.ROOT_FOLDER_KEY] ?: "null"
+        }.first()
     }
-
 }
