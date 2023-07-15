@@ -12,6 +12,7 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavHostController
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.example.natmisic.core.util.DataStoreKeys
 import kotlinx.coroutines.flow.collectLatest
@@ -21,7 +22,8 @@ import kotlin.coroutines.coroutineContext
 
 @Composable
 fun FolderPickerScreen(
-    viewModel: FolderPickerViewModel = hiltViewModel(),
+    navController: NavHostController,
+    viewModel: FolderPickerViewModel = hiltViewModel()
 ) {
     var showDirPicker by remember { mutableStateOf(false) }
 
