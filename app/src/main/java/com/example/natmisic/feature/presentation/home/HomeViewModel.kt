@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.natmisic.core.util.DataStoreKeys
+import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
@@ -17,12 +18,10 @@ import javax.inject.Inject
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
-    //private val noteUseCase: NoteUseCase
-    private val dataStore: DataStore<Preferences>
+    private val useCase: UseCases,
 ) : ViewModel() {
-    fun getRootFolderName(): String = runBlocking {
-        dataStore.data.map {
-            it[DataStoreKeys.ROOT_FOLDER_KEY] ?: "null"
-        }.first()
+    fun getRootFolderName(): String {
+        return useCase.getRootFolderName()
     }
+
 }

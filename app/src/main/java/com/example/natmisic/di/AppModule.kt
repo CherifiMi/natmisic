@@ -5,6 +5,8 @@ import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
+import com.example.natmisic.feature.domain.use_case.GetRootFolderName
+import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -26,31 +28,31 @@ object AppModule {
             }
         )
 
-    /*@Provides
-    @Singleton
-    fun provideNoteDatabase(app: Application): NoteDatabase{
-        return Room.databaseBuilder(
-            app,
-            NoteDatabase::class.java,
-            NoteDatabase.Database_Name
-        ).build()
-    }
-
     @Provides
     @Singleton
-    fun provideNoteRepository(dp: NoteDatabase): NoteRepository{
-        return NoteRepositoryImp(dp.notDao)
-    }*/
-
-
-    /*@Provides
-    @Singleton
-    fun provideUseCases(repository: NoteRepository): NoteUseCase {
-        return NoteUseCase(
-            getNote = GetNote(repository),
-            deleteNote = DeleteNote(repository),
-            addNote = AddNote(repository),
-            getNotes = GetNotes(repository)
-        )
-    }*/
+    fun provideUseCases(
+        dataStore: DataStore<Preferences>
+        //repository: Repository
+    ) = UseCases(
+        getRootFolderName = GetRootFolderName(dataStore)
+    )
 }
+
+/*@Provides
+@Singleton
+fun provideNoteDatabase(app: Application): NoteDatabase{
+    return Room.databaseBuilder(
+        app,
+        NoteDatabase::class.java,
+        NoteDatabase.Database_Name
+    ).build()
+}
+
+@Provides
+@Singleton
+fun provideNoteRepository(dp: NoteDatabase): NoteRepository{
+    return NoteRepositoryImp(dp.notDao)
+}*/
+
+
+
