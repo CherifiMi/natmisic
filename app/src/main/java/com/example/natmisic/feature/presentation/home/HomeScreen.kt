@@ -10,7 +10,7 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun HomeScreen(navController: NavHostController) {
-    Column(Modifier.fillMaxSize().background(Color.Red)) {
+    Column(Modifier.fillMaxSize()) {
 
     }
 }

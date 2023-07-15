@@ -21,6 +21,7 @@ import javax.inject.Inject
 class MainViewModel @Inject constructor(
     private val dataStore: DataStore<Preferences>
 ) : ViewModel() {
+    // TODO: run in flash screen
     fun hasRootFolder(): Boolean {
         return runBlocking {
             dataStore.data.map {

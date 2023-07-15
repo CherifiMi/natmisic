@@ -15,6 +15,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.darkrockstudios.libraries.mpfilepicker.DirectoryPicker
 import com.example.natmisic.core.util.DataStoreKeys
+import com.example.natmisic.feature.presentation.util.Screens
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
@@ -31,10 +32,11 @@ fun FolderPickerScreen(
         showDirPicker = false
         if (path!= null){
             viewModel.saveRootFolderName(path.toString())
+            navController.navigate(Screens.HOME.name)
         }
     }
 
-    Column(Modifier.fillMaxSize().clickable { viewModel.getRootFolderName() }) {
+    Column(Modifier.fillMaxSize()) {
         Button(onClick = {
             // open folder picker
             showDirPicker = true
