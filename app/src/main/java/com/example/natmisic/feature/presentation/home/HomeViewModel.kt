@@ -11,6 +11,7 @@ import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.documentfile.provider.DocumentFile
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import androidx.navigation.NavController
 import com.example.natmisic.core.util.DataStoreKeys
 import com.example.natmisic.core.util.TAG
@@ -18,6 +19,9 @@ import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.use_case.UseCases
 import com.example.natmisic.feature.presentation.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import java.io.File
 import javax.inject.Inject
 
@@ -47,41 +51,19 @@ class HomeViewModel @Inject constructor(
                 event.navController.navigate(Screens.SETTINGS.name)
             }
             is HomeEvent.Init -> {
-                _state.value = state.value.copy(books = getBooks(event.context))
+                viewModelScope.launch(Dispatchers.IO) {
+                    useCase.updateAndGetBooks(event.context).collect{
+                        launch(Dispatchers.Main) {
+                            _state.value = state.value.copy(books = it)
+                        }
+                    }
+                }
             }
         }
     }
-
-
-    fun getRootFolderName(): String {
-        return useCase.getDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY) ?: ""
-    }
-
     fun getBooks(context: Context): List<Book> {
-        val uri = Uri.parse(getRootFolderName())
-        val documentFile = DocumentFile.fromTreeUri(context, uri)
-        val files = documentFile?.listFiles()?.filter { it.type?.startsWith("audio/") == true }
 
-
-        files?.forEach {
-            Log.d(TAG, it.name.toString())
-        }
-
-        return files
-
+        return emptyList()
     }
 }
-/*
 
-private fun getMEtaData(file: DocumentFile?) {
-    val mediaMetadataRetriever = MediaMetadataRetriever()
-    mediaMetadataRetriever.setDataSource(this, file?.uri)
-    val title = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_TITLE)
-    val artist = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ARTIST)
-    val album = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_ALBUM)
-    val duration = mediaMetadataRetriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION)
-    val cover = mediaMetadataRetriever.embeddedPicture
-
-    Log.d(TAG, "$title   $artist   $album    $duration")
-}
-*/

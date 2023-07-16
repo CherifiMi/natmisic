@@ -9,12 +9,12 @@ import com.google.gson.reflect.TypeToken
 @Entity(tableName = "book")
 data class Book(
     @PrimaryKey val id: Int? = null,
-    val path: String?,
-    val name: String?,
-    val author: String?,
-    val cover: String?,
-    val duration: Long?,
-    val progress: Long?,
+    val path: String,
+    val name: String,
+    val author: String,
+    val cover: String,
+    val duration: Int,
+    val progress: Int,
     val timestamp: List<Timestamp?>
 ) {
     /*fun Book.progress(): Float {

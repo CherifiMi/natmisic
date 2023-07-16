@@ -23,6 +23,7 @@ fun HomeScreen(
     val state = viewModel.state.value
     val context = LocalContext.current
 
+
     // get books from database when screen first shows
     viewModel.onEvent(HomeEvent.Init(context))
 

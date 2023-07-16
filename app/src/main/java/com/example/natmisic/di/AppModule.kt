@@ -12,6 +12,7 @@ import com.example.natmisic.feature.data.local.BookDatabase
 import com.example.natmisic.feature.domain.reposetory.Repository
 import com.example.natmisic.feature.domain.use_case.GetDataStoreItem
 import com.example.natmisic.feature.domain.use_case.SetDataStoreItem
+import com.example.natmisic.feature.domain.use_case.UpdateAndGetBooks
 import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.Module
 import dagger.Provides
@@ -51,7 +52,8 @@ object AppModule {
         repository: Repository
     ) = UseCases(
         getDataStoreItem = GetDataStoreItem(dataStore),
-        setDataStoreItem = SetDataStoreItem(dataStore)
+        setDataStoreItem = SetDataStoreItem(dataStore),
+        updateAndGetBooks = UpdateAndGetBooks(repository, dataStore)
     )
 
     @Provides
