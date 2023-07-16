@@ -16,6 +16,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.natmisic.feature.presentation.folder_picker.FolderPickerScreen
 import com.example.natmisic.feature.presentation.home.HomeScreen
+import com.example.natmisic.feature.presentation.settings.SettingsScreen
 import com.example.natmisic.feature.presentation.util.Screens
 import com.example.natmisic.theme.NatMisicTheme
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,6 +46,9 @@ class MainActivity : ComponentActivity() {
                         }
                         composable(route = Screens.FOLDER_PICKER.name) {
                             FolderPickerScreen(navController = navController)
+                        }
+                        composable(route = Screens.SETTINGS.name) {
+                            SettingsScreen(navController = navController)
                         }
                     }
                 }
