@@ -20,15 +20,15 @@ fun HomeScreen(
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
+    val state = viewModel.state.value
     val context = LocalContext.current
 
-    LazyColumn(
-        Modifier
-            .fillMaxSize()
-            .background(Color.Red)
-    ) {
-        items(items = viewModel.getBooks(context)!!){
-            Text(text = it.isFile.toString(), color = Color.White)
+    // get books from database when screen first shows
+    viewModel.onEvent(HomeEvent.Init(context))
+
+    LazyColumn(Modifier.fillMaxSize()) {
+        items(state.books) {
+
         }
     }
 }
