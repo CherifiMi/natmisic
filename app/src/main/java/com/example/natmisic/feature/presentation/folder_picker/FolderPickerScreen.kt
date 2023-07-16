@@ -24,7 +24,8 @@ import kotlin.coroutines.coroutineContext
 @Composable
 fun FolderPickerScreen(
     navController: NavHostController,
-    viewModel: FolderPickerViewModel = hiltViewModel()
+    viewModel: FolderPickerViewModel = hiltViewModel(),
+    picker: () -> Unit
 ) {
     var showDirPicker by remember { mutableStateOf(false) }
 
@@ -38,11 +39,9 @@ fun FolderPickerScreen(
 
     Column(Modifier.fillMaxSize()) {
         Button(onClick = {
-            // open folder picker
-            showDirPicker = true
-            // save rout to data store
+            picker()
 
-            // nave to home
+            //showDirPicker = true
         }) {
             Text(text = "select books folder")
         }

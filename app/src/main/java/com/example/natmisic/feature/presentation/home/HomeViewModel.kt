@@ -1,12 +1,16 @@
 package com.example.natmisic.feature.presentation.home
 
+import android.net.Uri
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
 import androidx.lifecycle.ViewModel
 import com.example.natmisic.core.util.DataStoreKeys
 import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import java.io.File
 import javax.inject.Inject
+
 
 @HiltViewModel
 class HomeViewModel @Inject constructor(
@@ -17,6 +21,17 @@ class HomeViewModel @Inject constructor(
         return useCase.getDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY)?:""
     }
 
+
+    @RequiresApi(Build.VERSION_CODES.O)
+    fun listf(){
+        Log.d("FILETEST","CLICKED")
+
+        //val dir = File(Environment.getExternalStorageDirectory(), "Music/The Strokes")
+        val dir = File(Uri.parse(getRootFolderName()).path)
+
+        dir.listFiles()
+
+    }
 
 }
 
