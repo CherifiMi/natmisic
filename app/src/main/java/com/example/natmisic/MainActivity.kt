@@ -20,7 +20,6 @@ import com.example.natmisic.feature.presentation.util.Screens
 import com.example.natmisic.theme.NatMisicTheme
 import dagger.hilt.android.AndroidEntryPoint
 
-const val TAG = "FILETEST"
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
