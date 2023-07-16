@@ -54,16 +54,12 @@ class HomeViewModel @Inject constructor(
                 viewModelScope.launch(Dispatchers.IO) {
                     useCase.updateAndGetBooks(event.context).collect{
                         launch(Dispatchers.Main) {
-                            _state.value = state.value.copy(books = it)
+                            _state.value = state.value.copy(books = it, loading = false)
                         }
                     }
                 }
             }
         }
-    }
-    fun getBooks(context: Context): List<Book> {
-
-        return emptyList()
     }
 }
 

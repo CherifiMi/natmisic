@@ -10,7 +10,11 @@ import androidx.navigation.NavHostController
 
 @Composable
 fun SettingsScreen(navController: NavHostController) {
-    Column(Modifier.fillMaxSize().background(Color.Blue)) {
-        
+    Column(
+        Modifier
+            .fillMaxSize()
+            .background(Color.Blue)
+    ) {
+
     }
 }
