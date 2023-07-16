@@ -24,10 +24,6 @@ class FolderPickerViewModel @Inject constructor(
     private val useCase: UseCases
 ) : ViewModel() {
     fun saveRootFolderName(path: String) {
-        val s = path
-        useCase.setDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY, s)
-    }
-    fun getRootFolderName(): String {
-        return useCase.getDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY)?:""
+        useCase.setDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY, path)
     }
 }
