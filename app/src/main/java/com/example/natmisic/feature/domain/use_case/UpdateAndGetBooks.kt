@@ -5,6 +5,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
+import android.os.Environment
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.documentfile.provider.DocumentFile
@@ -57,7 +58,7 @@ class UpdateAndGetBooks(
         val cover = coverToPath(mediaMetadataRetriever.embeddedPicture, name ?: "", context)
 
         return Book(
-            path = file.uri.lastPathSegment!!,
+            path = Environment.getExternalStorageDirectory().absolutePath + file.uri.lastPathSegment?.replace("primary:","/"),
             name = name ?: "",
             author = author ?: "",
             cover = cover ?: "",

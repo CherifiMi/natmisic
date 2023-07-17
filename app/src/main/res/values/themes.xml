@@ -2,15 +2,8 @@
 <resources>
 
     <style name="Theme.NatMisic" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">
-            @color/light1
-        </item>
-        <item name="android:textColorPrimary">
-            @color/dark1
-        </item>
-
+        <item name="android:statusBarColor">@color/light1</item>
+        <item name="android:textColorPrimary">@color/dark1</item>
         <item name="android:windowLightStatusBar">true</item>
-
-
     </style>
 </resources>
