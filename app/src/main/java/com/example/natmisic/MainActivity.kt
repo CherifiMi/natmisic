@@ -39,7 +39,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = if(viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name
+                        startDestination = Screens.FOLDER_PICKER.name//if(viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name
                     ) {
                         composable(route = Screens.HOME.name) {
                             HomeScreen(navController)
@@ -47,9 +47,9 @@ class MainActivity : ComponentActivity() {
                         composable(route = Screens.FOLDER_PICKER.name) {
                             FolderPickerScreen(navController = navController)
                         }
-                        composable(route = Screens.SETTINGS.name) {
+                        /*composable(route = Screens.SETTINGS.name) {
                             SettingsScreen(navController = navController)
-                        }
+                        }*/
                     }
                 }
             }
