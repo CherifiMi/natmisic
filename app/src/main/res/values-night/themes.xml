@@ -1,16 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <style name="Theme.NatMisic" parent="android:Theme.Material.Light.NoActionBar">
         <item name="android:statusBarColor">
-            @color/light1
-        </item>
-        <item name="android:textColorPrimary">
             @color/dark1
         </item>
-
-        <item name="android:windowLightStatusBar">true</item>
-
-
+        <item name="android:textColorPrimary">
+            @color/light1
+        </item>
     </style>
 </resources>
