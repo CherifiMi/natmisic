@@ -32,8 +32,11 @@ class UpdateAndGetBooks(
         val documentFile = DocumentFile.fromTreeUri(context, uri)
         val files = documentFile?.listFiles()?.filter { it.type?.startsWith("audio/") == true }
 
-        files?.forEach {
-            repo.insertBook(fileToBook(it, context))
+        files?.forEach {file->
+            val book = fileToBook(file, context)
+            if (repo.getBooks().first().none { it.name == book.name }){
+                repo.insertBook(book)
+            }
         }
 
         return repo.getBooks()

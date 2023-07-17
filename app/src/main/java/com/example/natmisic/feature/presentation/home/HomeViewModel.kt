@@ -19,13 +19,13 @@ import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.use_case.UseCases
 import com.example.natmisic.feature.presentation.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import java.io.File
 import javax.inject.Inject
 
-//states
 sealed class HomeEvent {
     data class OpenSettings(val navController: NavController) : HomeEvent()
     data class Init(val context: Context) : HomeEvent()
@@ -52,9 +52,11 @@ class HomeViewModel @Inject constructor(
             }
             is HomeEvent.Init -> {
                 viewModelScope.launch(Dispatchers.IO) {
-                    useCase.updateAndGetBooks(event.context).collect{
-                        launch(Dispatchers.Main) {
+                    useCase.updateAndGetBooks(event.context).first().let {
+                        withContext(Dispatchers.Main) {
+                            delay(3000)
                             _state.value = state.value.copy(books = it, loading = false)
+                            this.cancel()
                         }
                     }
                 }
