@@ -56,7 +56,6 @@ class HomeViewModel @Inject constructor(
                         withContext(Dispatchers.Main) {
                             delay(3000)
                             _state.value = state.value.copy(books = it, loading = false)
-                            this.cancel()
                         }
                     }
                 }

@@ -2,6 +2,11 @@
 <resources>
 
     <style name="Theme.NatMisic" parent="android:Theme.Material.Light.NoActionBar">
-        <item name="android:statusBarColor">@color/purple_700</item>
+        <item name="android:statusBarColor">
+            @color/dark1
+        </item>
+        <item name="android:textColorPrimary">
+            @color/light1
+        </item>
     </style>
 </resources>
