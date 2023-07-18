@@ -1,5 +1,6 @@
 package com.example.musicplayer.exoplayer
 
+import android.net.Uri
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
 import android.support.v4.media.MediaDescriptionCompat
@@ -14,6 +15,7 @@ import com.google.android.exoplayer2.source.ProgressiveMediaSource
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import java.io.File
 import javax.inject.Inject
 
 class MusicSource @Inject constructor(
@@ -34,10 +36,10 @@ class MusicSource @Inject constructor(
                 .putString(METADATA_KEY_DISPLAY_TITLE, book.name)
                 .putString(METADATA_KEY_ARTIST, book.author)
                 .putString(METADATA_KEY_DISPLAY_SUBTITLE, book.author)
-                .putString(METADATA_KEY_MEDIA_ID, book.id.toString()) // ??
-                .putString(METADATA_KEY_MEDIA_URI, book.path) // ??
-                .putString(METADATA_KEY_DISPLAY_ICON_URI, book.cover) // ??
-                .putString(METADATA_KEY_ALBUM_ART_URI, book.cover) // ??
+                .putString(METADATA_KEY_MEDIA_ID, book.id.toString())
+                .putString(METADATA_KEY_MEDIA_URI, Uri.fromFile(File(book.path)).toString()) // ??
+                .putString(METADATA_KEY_DISPLAY_ICON_URI, Uri.fromFile(File(book.cover)).toString()) // ??
+                .putString(METADATA_KEY_ALBUM_ART_URI, Uri.fromFile(File(book.cover)).toString()) // ??
                 .putString(METADATA_KEY_DISPLAY_DESCRIPTION, book.author)
                 .build()
         }

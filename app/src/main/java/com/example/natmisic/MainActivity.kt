@@ -2,10 +2,7 @@ package com.example.natmisic
 
 import android.os.Build
 import android.os.Bundle
-import android.os.Environment
-import android.os.Environment.getExternalStorageDirectory
 import android.provider.DocumentsContract.*
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.viewModels
@@ -14,18 +11,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.view.WindowCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.example.natmisic.core.util.TAG
 import com.example.natmisic.feature.presentation.folder_picker.FolderPickerScreen
 import com.example.natmisic.feature.presentation.home.HomeScreen
 import com.example.natmisic.feature.presentation.settings.SettingsScreen
 import com.example.natmisic.feature.presentation.util.Screens
 import com.example.natmisic.theme.NatMisicTheme
 import dagger.hilt.android.AndroidEntryPoint
-import java.io.File
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -47,7 +41,7 @@ class MainActivity : ComponentActivity() {
                         startDestination = if(viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name
                     ) {
                         composable(route = Screens.HOME.name) {
-                            HomeScreen(navController)
+                            HomeScreen(navController, backPressedDispatcher = onBackPressedDispatcher)
                         }
                         composable(route = Screens.FOLDER_PICKER.name) {
                             FolderPickerScreen(navController = navController)

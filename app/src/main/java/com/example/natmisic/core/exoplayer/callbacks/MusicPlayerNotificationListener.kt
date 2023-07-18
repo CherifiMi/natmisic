@@ -4,7 +4,7 @@ import android.app.Notification
 import android.content.Intent
 import androidx.core.content.ContextCompat
 import com.example.natmisic.core.exoplayer.MusicService
-import com.example.musicplayer.other.Constants.NOTIFICATION_ID
+import com.example.natmisic.core.util.Constants.NOTIFICATION_ID
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 
 class MusicPlayerNotificationListener(

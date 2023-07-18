@@ -65,15 +65,11 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun slice(context: Context) {
+    /*fun slice(context: Context) {
         val p = "content://com.android.externalstorage.documents/tree/primary%3AAutodesk/document/primary%3AAutodesk%2FNever%20Split%20the%20Difference.m4a"
         val uri = Uri.parse(p)
 
         val path = "/storage/emulated/0/Autodesk/Never Split the Difference.m4a"
-        val file = File(path)
-
-        extract(0L, 100000L, file.path)
-        Log.d(TAG, file.exists().toString())
     }
 
     fun extract(startTimeMs: Long, endTimeMs: Long, path: String){
@@ -111,6 +107,8 @@ class HomeViewModel @Inject constructor(
         muxer.release()
         extractor.release()
     }
+    */
+
 
 }
 

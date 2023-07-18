@@ -1,4 +1,4 @@
-package com.example.musicplayer.other
+package com.example.natmisic.core.util
 
 open class Event<out T>(private val data: T) {
 

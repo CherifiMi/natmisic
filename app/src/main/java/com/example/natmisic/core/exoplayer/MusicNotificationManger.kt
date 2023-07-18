@@ -9,8 +9,8 @@ import android.support.v4.media.session.MediaSessionCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
-import com.example.musicplayer.other.Constants.NOTIFICATION_CHANNEL_ID
-import com.example.musicplayer.other.Constants.NOTIFICATION_ID
+import com.example.natmisic.core.util.Constants.NOTIFICATION_CHANNEL_ID
+import com.example.natmisic.core.util.Constants.NOTIFICATION_ID
 import com.example.natmisic.R
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager

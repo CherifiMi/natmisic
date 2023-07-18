@@ -1,4 +1,4 @@
-package com.example.musicplayer.other
+package com.example.natmisic.core.util
 
 object Constants {
 
