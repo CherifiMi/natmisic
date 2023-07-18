@@ -7,13 +7,15 @@ import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import androidx.room.Room
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.RequestOptions
+import com.example.musicplayer.exoplayer.MusicServiceConnection
+import com.example.natmisic.R
 import com.example.natmisic.feature.data.RepositoryImp
 import com.example.natmisic.feature.data.local.BookDatabase
 import com.example.natmisic.feature.domain.reposetory.Repository
-import com.example.natmisic.feature.domain.use_case.GetDataStoreItem
-import com.example.natmisic.feature.domain.use_case.SetDataStoreItem
-import com.example.natmisic.feature.domain.use_case.UpdateAndGetBooks
-import com.example.natmisic.feature.domain.use_case.UseCases
+import com.example.natmisic.feature.domain.use_case.*
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -53,7 +55,8 @@ object AppModule {
     ) = UseCases(
         getDataStoreItem = GetDataStoreItem(dataStore),
         setDataStoreItem = SetDataStoreItem(dataStore),
-        updateAndGetBooks = UpdateAndGetBooks(repository, dataStore)
+        updateAndGetBooks = UpdateAndGetBooks(repository, dataStore),
+        getAllBooks = GetAllBooks(repository)
     )
 
     @Provides
@@ -61,6 +64,24 @@ object AppModule {
     fun provideRepository(dp: BookDatabase): Repository {
         return RepositoryImp(dp.bookDao)
     }
+
+    @Singleton
+    @Provides
+    fun provideMusicServiceConnection(
+        @ApplicationContext context: Context
+    ) = MusicServiceConnection(
+        context
+    )
+    @Singleton
+    @Provides
+    fun provideGlideInstance(
+        @ApplicationContext context: Context
+    ) = Glide.with(context).setDefaultRequestOptions(
+        RequestOptions()
+            .placeholder(R.drawable.ic_image)
+            .error(R.drawable.ic_image)
+            .diskCacheStrategy(DiskCacheStrategy.DATA)
+    )
 }
 
 

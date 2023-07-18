@@ -94,4 +94,12 @@ dependencies {
     // coil
     implementation("io.coil-kt:coil-compose:2.4.0")
 
+    // Glide
+    implementation 'com.github.bumptech.glide:glide:4.10.0'
+    kapt 'com.github.bumptech.glide:compiler:4.10.0'
+
+    // ExoPlayer
+    api "com.google.android.exoplayer:exoplayer-core:$exoplayerVersion"
+    api "com.google.android.exoplayer:exoplayer-ui:$exoplayerVersion"
+    api "com.google.android.exoplayer:extension-mediasession:$exoplayerVersion"
 }
