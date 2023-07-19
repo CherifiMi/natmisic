@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.natmisic.feature.presentation.details.DetailsScreen
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
 import java.io.File
 
@@ -70,10 +71,11 @@ fun HomeScreen(
                 }
             }
         }
-        HomeBottomBar(
+        DetailsBottomBar(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
 
         )
+        DetailsScreen(backPressedDispatcher = backPressedDispatcher)
     }
 }

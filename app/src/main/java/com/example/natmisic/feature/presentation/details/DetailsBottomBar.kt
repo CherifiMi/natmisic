@@ -36,7 +36,7 @@ import java.io.File
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
-fun HomeBottomBar(
+fun DetailsBottomBar(
     modifier: Modifier = Modifier,
     viewModel: MainViewModel = hiltViewModel()
 ) {
