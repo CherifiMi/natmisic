@@ -3,6 +3,8 @@ package com.example.natmisic.feature.presentation.details
 import android.net.Uri
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -37,6 +39,7 @@ import com.example.natmisic.MainViewModel
 import com.example.natmisic.R
 import com.example.natmisic.core.exoplayer.toBook
 import com.example.natmisic.feature.domain.model.Book
+import com.example.natmisic.feature.presentation.util.Screens
 import java.io.File
 import kotlin.math.roundToInt
 

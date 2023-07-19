@@ -2,6 +2,9 @@ package com.example.natmisic.feature.presentation.home
 
 
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -26,14 +29,17 @@ import com.example.musicplayer.exoplayer.isPlaying
 import com.example.natmisic.MainViewModel
 import com.example.natmisic.R
 import com.example.natmisic.core.exoplayer.toBook
+import com.example.natmisic.core.util.TAG
 import com.example.natmisic.feature.domain.model.Book
+import com.example.natmisic.feature.presentation.details.DetailsViewModel
 import java.io.File
 
 
 @Composable
 fun DetailsBottomBar(
     modifier: Modifier = Modifier,
-    viewModel: MainViewModel = hiltViewModel()
+    viewModel: MainViewModel = hiltViewModel(),
+    detailsViewModel: DetailsViewModel = hiltViewModel()
 ) {
     var offsetX by remember { mutableStateOf(0f) }
     val currentSong = viewModel.currentPlayingSong.value
@@ -66,7 +72,8 @@ fun DetailsBottomBar(
                 DetailsBottomBarItem(
                     book = song!!,
                     playbackStateCompat = playbackStateCompat,
-                    viewModel = viewModel
+                    viewModel = viewModel,
+                    detailsViewModel = detailsViewModel
                 )
             }
         }
@@ -78,8 +85,18 @@ fun DetailsBottomBar(
 fun DetailsBottomBarItem(
     book: Book,
     playbackStateCompat: PlaybackStateCompat?,
-    viewModel: MainViewModel
+    viewModel: MainViewModel,
+    detailsViewModel: DetailsViewModel
 ) {
+    val activityResultLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        result.data?.also {
+            Log.d(TAG, it.data.toString())
+        }
+    }
+
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween,
@@ -199,7 +216,7 @@ fun DetailsBottomBarItem(
                             bounded = false,
                             radius = 24.dp
                         )
-                    ) { viewModel.playOrToggleSong(book, true) },
+                    ) { detailsViewModel.recordAndSaveTranscript(viewModel.currentPlayingSong.value!!.toBook()!!, detailsViewModel.currentPlayerPosition, activityResultLauncher) },
             )
         }
     }

@@ -10,9 +10,10 @@ import com.example.musicplayer.exoplayer.MusicServiceConnection
 import com.example.musicplayer.exoplayer.isPlayEnabled
 import com.example.musicplayer.exoplayer.isPlaying
 import com.example.musicplayer.exoplayer.isPrepared
+import com.example.natmisic.core.exoplayer.MusicService
 import com.example.natmisic.core.util.Constants
-import com.example.natmisic.core.util.Resource
 import com.example.natmisic.core.util.DataStoreKeys
+import com.example.natmisic.core.util.Resource
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -28,7 +29,7 @@ class MainViewModel @Inject constructor(
         return useCase.getDataStoreItem(DataStoreKeys.ROOT_FOLDER_KEY) != null
     }
 
-    // for exoplyer
+    // for exoplyer move all to details screen
 
     var mediaItems = mutableStateOf<Resource<List<Book>>>(Resource.Loading(null))
 
@@ -62,7 +63,7 @@ class MainViewModel @Inject constructor(
                                     name = it.description.title.toString(),
                                     author = it.description.subtitle.toString(),
                                     cover = it.description.iconUri.toString(),
-                                    duration = 0,
+                                    duration = MusicService.currentSongDuration.toInt(),
                                     progress = 0,
                                     timestamp = emptyList()
                         )
