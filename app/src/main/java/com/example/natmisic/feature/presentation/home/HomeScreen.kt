@@ -5,6 +5,7 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.natmisic.MainViewModel
 import com.example.natmisic.feature.presentation.details.DetailsScreen
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
 import java.io.File
@@ -31,6 +33,7 @@ import java.io.File
 fun HomeScreen(
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel(),
+    mainViewModel: MainViewModel = hiltViewModel(),
     backPressedDispatcher: OnBackPressedDispatcher
 ) {
     val state = viewModel.state.value
@@ -60,7 +63,11 @@ fun HomeScreen(
                 Box(
                     modifier = Modifier
                         .size(200.dp)
-                        .padding(40.dp),
+                        .padding(40.dp)
+                        .clickable {
+                            mainViewModel.playOrToggleSong(book)
+                            mainViewModel.showPlayerFullScreen = true
+                        },
                     contentAlignment = Alignment.Center
                 ) {
                     Image(
