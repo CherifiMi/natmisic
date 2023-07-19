@@ -5,14 +5,14 @@ import androidx.activity.OnBackPressedDispatcher
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.ExperimentalMaterialApi
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -23,9 +23,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.natmisic.MainViewModel
+import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.presentation.details.DetailsScreen
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
 import java.io.File
+
 
 @OptIn(ExperimentalAnimationApi::class, ExperimentalMaterialApi::class)
 @RequiresApi(Build.VERSION_CODES.O)
@@ -58,31 +60,47 @@ fun HomeScreen(
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
+        Row(
+            Modifier
+                .height(80.dp)
+                .align(Alignment.TopCenter))
+        {
+            Text(text = "search bar")
+        }
         LazyColumn(Modifier.fillMaxSize()) {
             items(state.books) { book ->
-                Box(
-                    modifier = Modifier
-                        .size(200.dp)
-                        .padding(40.dp)
-                        .clickable {
-                            mainViewModel.playOrToggleSong(book)
-                            mainViewModel.showPlayerFullScreen = true
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Image(
-                        painter = rememberAsyncImagePainter(model = File(book.cover)),
-                        contentDescription = ""
-                    )
-                    Text(text = book.name)
-                }
+                BookItem(book, mainViewModel)
             }
         }
-        DetailsBottomBar(
-            modifier = Modifier
-                .align(Alignment.BottomCenter)
-
-        )
+        DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
         DetailsScreen(backPressedDispatcher = backPressedDispatcher)
+    }
+}
+
+@Composable
+fun BookItem(book: Book, mainViewModel: MainViewModel) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .wrapContentHeight()
+            .padding(8.dp)
+            .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(4.dp))
+            .clickable {
+                mainViewModel.playOrToggleSong(book)
+                mainViewModel.showPlayerFullScreen = true
+            }
+    ) {
+        Image(
+            modifier = Modifier
+                .size(112.dp)
+                .padding(4.dp)
+                .background(MaterialTheme.colors.primary, RoundedCornerShape(4.dp)),
+            painter = rememberAsyncImagePainter(model = File(book.cover)),
+            contentDescription = ""
+        )
+        Column(Modifier.fillMaxSize()) {
+            Text(text = book.name, color = MaterialTheme.colors.secondary)
+            Text(text = book.name, color = MaterialTheme.colors.secondary)
+        }
     }
 }

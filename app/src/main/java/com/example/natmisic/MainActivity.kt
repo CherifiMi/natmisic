@@ -49,12 +49,12 @@ class MainActivity : ComponentActivity() {
             NatMisicTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colors.background
+                    color = MaterialTheme.colors.primary
                 ) {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = Screens.FOLDER_PICKER.name//if(viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name
+                        startDestination = if(viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name
                     ) {
                         composable(route = Screens.HOME.name) {
                             HomeScreen(navController, backPressedDispatcher = onBackPressedDispatcher)
