@@ -1,10 +1,8 @@
 package com.example.natmisic.feature.presentation.details
 
-import android.graphics.Bitmap
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
 import androidx.lifecycle.ViewModel
 import com.example.musicplayer.exoplayer.MusicServiceConnection
 import com.example.musicplayer.exoplayer.currentPlaybackPosition
@@ -50,17 +48,6 @@ class DetailsViewModel @Inject constructor(
         }
         delay(Constants.UPDATE_PLAYER_POSITION_INTERVAL)
         updateCurrentPlaybackPosition()
-    }
-
-    fun calculateColorPalette(drawable: Bitmap, onFinish: (Color) -> Unit) {
-
-        onFinish(Color.Red) // TODO: fix
-
-        /*Palette.from(drawable).generate { palette ->
-            palette?.dominantSwatch?.rgb?.let { colorValue ->
-                onFinish(Color(colorValue))
-            }
-        }*/
     }
 
     private fun formatLong(value: Long): String {

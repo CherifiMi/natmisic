@@ -54,7 +54,7 @@ class MainActivity : ComponentActivity() {
                     val navController = rememberNavController()
                     NavHost(
                         navController = navController,
-                        startDestination = if(viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name
+                        startDestination = Screens.FOLDER_PICKER.name//if(viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name
                     ) {
                         composable(route = Screens.HOME.name) {
                             HomeScreen(navController, backPressedDispatcher = onBackPressedDispatcher)

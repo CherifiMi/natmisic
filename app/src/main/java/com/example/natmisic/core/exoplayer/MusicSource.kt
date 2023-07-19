@@ -31,7 +31,7 @@ class MusicSource @Inject constructor(
         val allSongs: List<Book> = useCases.getAllBooks()
         songsTest = allSongs
         songs = allSongs.map { book ->
-            MediaMetadataCompat.Builder() // TODO: fix
+            MediaMetadataCompat.Builder()
                 .putString(METADATA_KEY_TITLE, book.name)
                 .putString(METADATA_KEY_DISPLAY_TITLE, book.name)
                 .putString(METADATA_KEY_ARTIST, book.author)
