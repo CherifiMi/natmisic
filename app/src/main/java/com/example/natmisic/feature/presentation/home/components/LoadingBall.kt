@@ -13,11 +13,12 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.natmisic.theme.Blu
 import kotlinx.coroutines.delay
 
 @Composable
 fun LoadingBall(
-    circleColor: Color = Color.Black,
+    circleColor: Color = Blu,
     animationDelay: Int = 1500
 
 ) {

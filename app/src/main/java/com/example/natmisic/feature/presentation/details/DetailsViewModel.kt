@@ -71,6 +71,7 @@ class DetailsViewModel @Inject constructor(
     ) {
         Log.d(TAG, "$book $timestamp")
 
+        // TODO: this
 
         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH)
         intent.putExtra(
@@ -84,7 +85,7 @@ class DetailsViewModel @Inject constructor(
         )
         intent.putExtra(RecognizerIntent.EXTRA_SPEECH_INPUT_COMPLETE_SILENCE_LENGTH_MILLIS, 5000)
         intent.putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 1)
-        val uri = Uri.fromFile(File(book.path))
+        val uri = Uri.parse(File(book.path).path)
         intent.setData(uri)
 
         activityResultLauncher.launch(intent)

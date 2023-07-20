@@ -102,6 +102,7 @@ fun DetailsBottomBarItem(
         horizontalArrangement = Arrangement.SpaceBetween,
         modifier = Modifier
             .fillMaxWidth()
+            .height(100.dp)
             .border(BorderStroke(2.dp, MaterialTheme.colors.secondary), RoundedCornerShape(100))
     ) {
         Row(Modifier.weight(2f)) {
@@ -143,7 +144,7 @@ fun DetailsBottomBarItem(
                 )
             }
         }
-        Row (Modifier.weight(1.7f), horizontalArrangement = Arrangement.SpaceEvenly){
+        Row(Modifier.weight(1.7f), horizontalArrangement = Arrangement.SpaceEvenly) {
             Image(
                 painter = rememberAsyncImagePainter(model = R.drawable.play_back_ic),
                 contentDescription = "",
@@ -216,7 +217,13 @@ fun DetailsBottomBarItem(
                             bounded = false,
                             radius = 24.dp
                         )
-                    ) { detailsViewModel.recordAndSaveTranscript(viewModel.currentPlayingSong.value!!.toBook()!!, detailsViewModel.currentPlayerPosition, activityResultLauncher) },
+                    ) {
+                        detailsViewModel.recordAndSaveTranscript(
+                            viewModel.currentPlayingSong.value!!.toBook()!!,
+                            detailsViewModel.currentPlayerPosition,
+                            activityResultLauncher
+                        )
+                    },
             )
         }
     }
