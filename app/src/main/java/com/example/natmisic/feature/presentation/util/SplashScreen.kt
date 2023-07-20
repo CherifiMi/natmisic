@@ -34,8 +34,7 @@ fun SplashScreen(navController: NavHostController, viewModel: MainViewModel) {
             })
         )
         delay(2000)
-        //navController.navigate(if (viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name)
-        navController.navigate(Screens.FOLDER_PICKER.name)
+        navController.navigate(if (viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name)
     }
     Box(
         modifier = Modifier

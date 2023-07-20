@@ -26,6 +26,7 @@ import com.example.natmisic.MainViewModel
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.presentation.details.DetailsScreen
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
+import com.example.natmisic.feature.presentation.util.Screens
 import java.io.File
 
 
@@ -57,23 +58,24 @@ fun HomeScreen(
     }
 
 
-    Box(
-        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-    ) {
+    Column(Modifier.fillMaxSize()) {
         Row(
             Modifier
-                .height(80.dp)
-                .align(Alignment.TopCenter))
-        {
+                .height(80.dp).clickable { navController.navigate(Screens.SETTINGS.name) }
+        ){
             Text(text = "search bar")
         }
-        LazyColumn(Modifier.fillMaxSize()) {
-            items(state.books) { book ->
-                BookItem(book, mainViewModel)
+        Box(
+            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+        ) {
+            LazyColumn(Modifier.fillMaxSize()) {
+                items(state.books) { book ->
+                    BookItem(book, mainViewModel)
+                }
             }
+            DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
+            DetailsScreen(backPressedDispatcher = backPressedDispatcher)
         }
-        DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
-        DetailsScreen(backPressedDispatcher = backPressedDispatcher)
     }
 }
 
