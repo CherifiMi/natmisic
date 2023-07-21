@@ -51,6 +51,7 @@ class MainActivity : ComponentActivity() {
         }
 
 
+
         setContent {
             NatMisicTheme {
                 Surface(
@@ -83,3 +84,4 @@ class MainActivity : ComponentActivity() {
         }
     }
 }
+

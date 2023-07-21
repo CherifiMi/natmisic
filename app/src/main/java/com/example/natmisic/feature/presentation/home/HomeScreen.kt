@@ -22,9 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
-import com.example.natmisic.MainViewModel
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.presentation.details.DetailsScreen
+import com.example.natmisic.feature.presentation.details.DetailsViewModel
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
 import com.example.natmisic.feature.presentation.util.Screens
 import java.io.File
@@ -36,7 +36,7 @@ import java.io.File
 fun HomeScreen(
     navController: NavHostController,
     viewModel: HomeViewModel = hiltViewModel(),
-    mainViewModel: MainViewModel = hiltViewModel(),
+    detailsViewModel: DetailsViewModel = hiltViewModel(),
     backPressedDispatcher: OnBackPressedDispatcher
 ) {
     val state = viewModel.state.value
@@ -58,29 +58,28 @@ fun HomeScreen(
     }
 
 
-    Column(Modifier.fillMaxSize()) {
-        Row(
-            Modifier
-                .height(80.dp).clickable { navController.navigate(Screens.SETTINGS.name) }
-        ){
-            Text(text = "search bar")
-        }
-        Box(
-            modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
-        ) {
+    Box(
+        modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
+    ) {
+        Column(Modifier.fillMaxSize()) {
+            Row(
+                Modifier.height(80.dp).clickable { navController.navigate(Screens.SETTINGS.name) }
+            ){
+                Text(text = "search bar")
+            }
             LazyColumn(Modifier.fillMaxSize()) {
                 items(state.books) { book ->
-                    BookItem(book, mainViewModel)
+                    BookItem(book, detailsViewModel)
                 }
             }
-            DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
-            DetailsScreen(backPressedDispatcher = backPressedDispatcher)
         }
+        DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
+        DetailsScreen(backPressedDispatcher = backPressedDispatcher)
     }
 }
 
 @Composable
-fun BookItem(book: Book, mainViewModel: MainViewModel) {
+fun BookItem(book: Book, mainViewModel: DetailsViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()

@@ -4,5 +4,7 @@ data class UseCases(
     val setDataStoreItem: SetDataStoreItem,
     val getDataStoreItem: GetDataStoreItem,
     val updateAndGetBooks: UpdateAndGetBooks,
-    val getAllBooks: GetAllBooks
+    val getAllBooks: GetAllBooks,
+    val getBookById: GetBookById,
+    val updateBookById: UpdateBookById,
 )

@@ -3,8 +3,6 @@ package com.example.natmisic.feature.presentation.details
 import android.net.Uri
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.DrawableRes
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -35,11 +33,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import coil.ImageLoader
 import coil.compose.rememberAsyncImagePainter
 import coil.request.ImageRequest
-import com.example.natmisic.MainViewModel
 import com.example.natmisic.R
-import com.example.natmisic.core.exoplayer.toBook
 import com.example.natmisic.feature.domain.model.Book
-import com.example.natmisic.feature.presentation.util.Screens
 import java.io.File
 import kotlin.math.roundToInt
 
@@ -49,12 +44,11 @@ import kotlin.math.roundToInt
 @Composable
 fun DetailsScreen(
     backPressedDispatcher: OnBackPressedDispatcher,
-    mainViewModel: MainViewModel = hiltViewModel(),
-    songViewModel: DetailsViewModel = hiltViewModel()
+    detailsViewModel: DetailsViewModel = hiltViewModel()
 ) {
-    val book = mainViewModel.currentPlayingSong.value
+    val book = detailsViewModel.currentPlayingSong.value
     AnimatedVisibility(
-        visible = book != null && mainViewModel.showPlayerFullScreen,
+        visible = book != null && detailsViewModel.showPlayerFullScreen,
         enter = slideInVertically(
             initialOffsetY = { it }
         ),
@@ -63,10 +57,9 @@ fun DetailsScreen(
         )) {
         if (book != null) {
             SongScreenBody(
-                book = book.toBook()!!,
+                book = detailsViewModel.toBook(book)!!,
                 backPressedDispatcher = backPressedDispatcher,
-                mainViewModel = mainViewModel,
-                songViewModel = songViewModel
+                songViewModel = detailsViewModel
             )
         }
     }
@@ -77,7 +70,6 @@ fun DetailsScreen(
 fun SongScreenBody(
     book: Book,
     backPressedDispatcher: OnBackPressedDispatcher,
-    mainViewModel: MainViewModel,
     songViewModel: DetailsViewModel
 ) {
     val swipeableState = rememberSwipeableState(initialValue = 0)
@@ -90,7 +82,7 @@ fun SongScreenBody(
     val backCallback = remember {
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                mainViewModel.showPlayerFullScreen = false
+                songViewModel.showPlayerFullScreen = false
             }
         }
     }
@@ -112,9 +104,9 @@ fun SongScreenBody(
     val imagePainter = rememberAsyncImagePainter(model = File(book.cover))
 
     val iconResId =
-        if (mainViewModel.songIsPlaying) R.drawable.ic_round_pause else R.drawable.ic_round_play_arrow
+        if (songViewModel.songIsPlaying) R.drawable.ic_round_pause else R.drawable.ic_round_play_arrow
 
-    val isSongPlaying = mainViewModel.songIsPlaying
+    val isSongPlaying = songViewModel.songIsPlaying
 
     var sliderIsChanging by remember { mutableStateOf(false) }
 
@@ -140,7 +132,7 @@ fun SongScreenBody(
     ) {
         if (swipeableState.currentValue >= 1) {
             LaunchedEffect("key") {
-                mainViewModel.showPlayerFullScreen = false
+                songViewModel.showPlayerFullScreen = false
             }
         }
         SongScreenContent(
@@ -153,29 +145,29 @@ fun SongScreenBody(
             totalTime = songViewModel.currentSongFormattedPosition,
             playPauseIcon = iconResId,
             yOffset = swipeableState.offset.value.roundToInt(),
-            playOrToggleSong = { mainViewModel.playOrToggleSong(book, true) },
-            playNextSong = { mainViewModel.skipToNextSong() },
-            playPreviousSong = { mainViewModel.skipToPreviousSong() },
+            playOrToggleSong = { songViewModel.playOrToggleSong(book, true) },
+            playNextSong = { songViewModel.skipToNextSong() },
+            playPreviousSong = { songViewModel.skipToPreviousSong() },
             onSliderChange = { newPosition ->
                 localSliderValue = newPosition
                 sliderIsChanging = true
             },
             onSliderChangeFinished = {
-                mainViewModel.seekTo(songViewModel.currentSongDuration * localSliderValue)
+                songViewModel.seekTo(songViewModel.currentSongDuration * localSliderValue)
                 sliderIsChanging = false
             },
             onForward = {
                 songViewModel.currentPlaybackPosition.let { currentPosition ->
-                    mainViewModel.seekTo(currentPosition + 10 * 1000f)
+                    songViewModel.seekTo(currentPosition + 10 * 1000f)
                 }
             },
             onRewind = {
                 songViewModel.currentPlaybackPosition.let { currentPosition ->
-                    mainViewModel.seekTo(if (currentPosition - 10 * 1000f < 0) 0f else currentPosition - 10 * 1000f)
+                    songViewModel.seekTo(if (currentPosition - 10 * 1000f < 0) 0f else currentPosition - 10 * 1000f)
                 }
             },
             onClose = {
-                mainViewModel.showPlayerFullScreen = false
+                songViewModel.showPlayerFullScreen = false
             }
         )
     }
@@ -189,7 +181,7 @@ fun SongScreenBody(
 
         onDispose {
             backCallback.remove()
-            mainViewModel.showPlayerFullScreen = false
+            songViewModel.showPlayerFullScreen = false
         }
     }
 }

@@ -56,7 +56,9 @@ object AppModule {
         getDataStoreItem = GetDataStoreItem(dataStore),
         setDataStoreItem = SetDataStoreItem(dataStore),
         updateAndGetBooks = UpdateAndGetBooks(repository, dataStore),
-        getAllBooks = GetAllBooks(repository)
+        getAllBooks = GetAllBooks(repository),
+        getBookById = GetBookById(repository),
+        updateBookById = UpdateBookById(repository)
     )
 
     @Provides

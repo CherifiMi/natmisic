@@ -10,6 +10,10 @@ class RepositoryImp(private val dao: BookDao): Repository {
         return dao.getBooks()
     }
 
+    override suspend fun getBookById(id: Int): Book {
+        return dao.getBookById(id)!!
+    }
+
     override suspend fun insertBook(book: Book) {
         dao.insertBook(book)
     }

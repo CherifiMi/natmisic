@@ -33,7 +33,7 @@ fun SplashScreen(navController: NavHostController, viewModel: MainViewModel) {
                 OvershootInterpolator(2f).getInterpolation(it)
             })
         )
-        delay(2000)
+        delay(500)
         navController.navigate(if (viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name)
     }
     Box(

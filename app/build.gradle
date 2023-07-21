@@ -107,7 +107,10 @@ dependencies {
     api "com.google.android.exoplayer:exoplayer-ui:$exoplayerVersion"
     api "com.google.android.exoplayer:extension-mediasession:$exoplayerVersion"
 
+    // pager
     implementation "com.google.accompanist:accompanist-pager:0.30.1"
     implementation "com.google.accompanist:accompanist-pager-indicators:0.30.1"
 
+    // ffmpeg
+    implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
 }
