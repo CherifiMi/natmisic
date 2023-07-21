@@ -2,7 +2,6 @@ package com.example.natmisic.core.util
 
 object Constants {
 
-    const val SONG_COLLECTION = "songs"
     const val SERVICE_TAG = "MusicService"
 
     const val MEDIA_ROOT_ID = "root_id"

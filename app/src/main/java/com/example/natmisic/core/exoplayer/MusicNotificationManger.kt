@@ -9,9 +9,9 @@ import android.support.v4.media.session.MediaSessionCompat
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.target.CustomTarget
 import com.bumptech.glide.request.transition.Transition
+import com.example.natmisic.R
 import com.example.natmisic.core.util.Constants.NOTIFICATION_CHANNEL_ID
 import com.example.natmisic.core.util.Constants.NOTIFICATION_ID
-import com.example.natmisic.R
 import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.ui.PlayerNotificationManager
 
@@ -32,7 +32,11 @@ class MusicNotificationManger(
             NOTIFICATION_CHANNEL_ID,
             DescriptionAdapter(mediaController)
             )
-            .setSmallIconResourceId(R.drawable.ic_music)
+            .setSmallIconResourceId(R.drawable.splash_dark)
+            .setPauseActionIconResourceId(R.drawable.play_puase_ic)
+            .setPlayActionIconResourceId(R.drawable.play_ic)
+            .setFastForwardActionIconResourceId(R.drawable.play_skip_ic)
+            .setRewindActionIconResourceId(R.drawable.play_back_ic)
             .setNotificationListener(notificationListener)
             .setChannelNameResourceId(R.string.notification_channel_name)
             .build()
@@ -40,6 +44,12 @@ class MusicNotificationManger(
     }
 
     fun showNotification(player: Player) {
+        notificationManager.setUsePreviousAction(false)
+        notificationManager.setUsePreviousActionInCompactView(false)
+
+        notificationManager.setUseNextAction(false)
+        notificationManager.setUseNextActionInCompactView(false)
+
         notificationManager.setPlayer(player)
     }
 
