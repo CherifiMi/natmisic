@@ -70,12 +70,7 @@ fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
         Modifier
             .fillMaxSize()
             .background(MaterialTheme.colors.primary)
-            .swipeable(
-                state = swipeableState,
-                anchors = anchors,
-                thresholds = { _, _ -> FractionalThreshold(0.34f) },
-                orientation = Orientation.Vertical
-            )
+
     ) {
         if (swipeableState.currentValue >= 1) {
             LaunchedEffect("key") {
@@ -85,7 +80,13 @@ fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
         Row(
             Modifier
                 .height(56.dp)
-                .fillMaxWidth(),
+                .fillMaxWidth()
+                .swipeable(
+                    state = swipeableState,
+                    anchors = anchors,
+                    thresholds = { _, _ -> FractionalThreshold(0.34f) },
+                    orientation = Orientation.Vertical
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
