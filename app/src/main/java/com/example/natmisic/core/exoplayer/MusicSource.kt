@@ -37,9 +37,9 @@ class MusicSource @Inject constructor(
                 .putString(METADATA_KEY_ARTIST, book.author)
                 .putString(METADATA_KEY_DISPLAY_SUBTITLE, book.author)
                 .putString(METADATA_KEY_MEDIA_ID, book.id.toString())
-                .putString(METADATA_KEY_MEDIA_URI, Uri.fromFile(File(book.path)).toString()) // ??
-                .putString(METADATA_KEY_DISPLAY_ICON_URI, Uri.fromFile(File(book.cover)).toString()) // ??
-                .putString(METADATA_KEY_ALBUM_ART_URI, Uri.fromFile(File(book.cover)).toString()) // ??
+                .putString(METADATA_KEY_MEDIA_URI, Uri.fromFile(File(book.path)).toString())
+                .putString(METADATA_KEY_DISPLAY_ICON_URI, Uri.fromFile(File(book.cover)).toString())
+                .putString(METADATA_KEY_ALBUM_ART_URI, Uri.fromFile(File(book.cover)).toString())
                 .putString(METADATA_KEY_DISPLAY_DESCRIPTION, book.author)
                 .build()
         }

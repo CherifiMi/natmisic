@@ -44,11 +44,11 @@ import kotlin.math.roundToInt
 @Composable
 fun DetailsScreen(
     backPressedDispatcher: OnBackPressedDispatcher,
-    detailsViewModel: DetailsViewModel = hiltViewModel()
+    songViewModel: DetailsViewModel = hiltViewModel()
 ) {
-    val book = detailsViewModel.currentPlayingSong.value
+    val book = songViewModel.currentPlayingSong.value
     AnimatedVisibility(
-        visible = book != null && detailsViewModel.showPlayerFullScreen,
+        visible = book != null && songViewModel.showPlayerFullScreen,
         enter = slideInVertically(
             initialOffsetY = { it }
         ),
@@ -57,9 +57,9 @@ fun DetailsScreen(
         )) {
         if (book != null) {
             SongScreenBody(
-                book = detailsViewModel.toBook(book)!!,
+                book = songViewModel.toBook(book)!!,
                 backPressedDispatcher = backPressedDispatcher,
-                songViewModel = detailsViewModel
+                songViewModel = songViewModel
             )
         }
     }

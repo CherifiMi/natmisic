@@ -4,7 +4,6 @@ package com.example.natmisic.feature.presentation.home
 import android.support.v4.media.session.PlaybackStateCompat
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,8 +11,10 @@ import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -21,15 +22,17 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.example.musicplayer.exoplayer.isPlaying
 import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
+import com.example.natmisic.feature.presentation.details.DetailsEvent
 import com.example.natmisic.feature.presentation.details.DetailsViewModel
 import java.io.File
 
@@ -39,7 +42,6 @@ fun DetailsBottomBar(
     modifier: Modifier = Modifier,
     detailsViewModel: DetailsViewModel = hiltViewModel()
 ) {
-    var offsetX by remember { mutableStateOf(0f) }
     val currentSong = detailsViewModel.currentPlayingSong.value
     val playbackStateCompat by detailsViewModel.playbackState.observeAsState()
 
@@ -59,16 +61,6 @@ fun DetailsBottomBar(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(100.dp)
-                    .pointerInput(Unit) {
-                        detectDragGestures(
-                            onDrag = { change, dragAmount ->
-                                change.consume()
-                                val (x, y) = dragAmount
-                                offsetX = x
-                            }
-                        )
-
-                    }
                     .background(Brush.verticalGradient(colorStops = colorStops)),
                 contentAlignment = Alignment.BottomCenter
             ) {
@@ -128,7 +120,8 @@ fun DetailsBottomBarItem(
             ) {
                 Text(
                     book.name,
-                    style = MaterialTheme.typography.body2,
+                    fontSize = 13.sp,
+                    fontWeight = FontWeight.SemiBold,
                     color = MaterialTheme.colors.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -136,7 +129,7 @@ fun DetailsBottomBarItem(
 
                 Text(
                     book.author,
-                    style = MaterialTheme.typography.body2,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colors.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
@@ -216,7 +209,7 @@ fun DetailsBottomBarItem(
                         detailsViewModel.currentPlaybackPosition.let { currentPosition ->
                             detailsViewModel.seekTo(currentPosition + 15 * 1000f)
                         }
-                      },
+                    },
             )
             Icon(
                 painter = rememberAsyncImagePainter(model = R.drawable.recording),
@@ -233,10 +226,12 @@ fun DetailsBottomBarItem(
                             radius = 24.dp
                         )
                     ) {
-                        detailsViewModel.recordAndSaveTranscript(
-                            detailsViewModel.toBook(detailsViewModel.currentPlayingSong.value!!)!!,
-                            detailsViewModel.currentPlayerPosition * detailsViewModel.currentSongDuration,
-                            context
+                        detailsViewModel.onEvent(
+                            DetailsEvent.RecordAndSaveTranscript(
+                                detailsViewModel.toBook(detailsViewModel.currentPlayingSong.value!!)!!,
+                                detailsViewModel.currentSongFormattedPosition,
+                                context
+                            )
                         )
                     },
             )

@@ -16,25 +16,12 @@ data class Book(
     val duration: Int,
     val progress: Int,
     val timestamp: List<Timestamp?>
-) {
-    /*fun Book.progress(): Float {
-        val globalPosition = 5 //position
-        val totalDuration = duration
-        val progress = globalPosition.toFloat() / totalDuration!!.toFloat()
-
-        return progress.coerceIn(0F, 1F)
-    }*/
-    /*fun formatDuration(duration: Long): String {
-        val minutes = TimeUnit.MILLISECONDS.toMinutes(duration)
-        val seconds = TimeUnit.MILLISECONDS.toSeconds(duration) - TimeUnit.MINUTES.toSeconds(minutes)
-        return String.format("%02d:%02d", minutes, seconds)
-    }*/
-}
+)
 
 data class Timestamp(
     val id: Int,
     val text: String,
-    val time: Long
+    val time: String
 )
 
 class Converters {

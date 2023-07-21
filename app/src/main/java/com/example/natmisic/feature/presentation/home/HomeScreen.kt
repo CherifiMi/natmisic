@@ -11,19 +11,24 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
+import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
-import com.example.natmisic.feature.presentation.details.DetailsScreen
+import com.example.natmisic.feature.presentation.details.DetailsScreen2
 import com.example.natmisic.feature.presentation.details.DetailsViewModel
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
 import com.example.natmisic.feature.presentation.util.Screens
@@ -57,27 +62,56 @@ fun HomeScreen(
         }
     }
 
-
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
         Column(Modifier.fillMaxSize()) {
-            Row(
-                Modifier.height(80.dp).clickable { navController.navigate(Screens.SETTINGS.name) }
-            ){
-                Text(text = "search bar")
-            }
+            TopBar(navController = navController)
             LazyColumn(Modifier.fillMaxSize()) {
                 items(state.books) { book ->
                     BookItem(book, detailsViewModel)
                 }
+                item {
+                    Spacer(modifier = Modifier.size(200.dp))
+                }
             }
         }
         DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
-        DetailsScreen(backPressedDispatcher = backPressedDispatcher)
+        DetailsScreen2()
+        //DetailsScreen(backPressedDispatcher)
     }
 }
 
+@Composable
+fun TopBar(navController: NavHostController) {
+    Row(
+        Modifier
+            .height(56.dp)
+            .fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        IconButton(onClick = { navController.popBackStack() }) {
+            Icon(
+                painter = painterResource(id = R.drawable.search_ic),
+                contentDescription = "",
+                tint = MaterialTheme.colors.secondary,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
+            )
+        }
+        IconButton(onClick = { navController.navigate(Screens.SETTINGS.name) }) {
+            Icon(
+                painter = painterResource(id = R.drawable.settings_ic),
+                contentDescription = "",
+                tint = MaterialTheme.colors.secondary,
+                modifier = Modifier
+                    .padding(16.dp)
+                    .padding(horizontal = 16.dp)
+            )
+        }
+    }
+}
 @Composable
 fun BookItem(book: Book, mainViewModel: DetailsViewModel) {
     Row(
@@ -85,7 +119,8 @@ fun BookItem(book: Book, mainViewModel: DetailsViewModel) {
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(8.dp)
-            .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(4.dp))
+            .padding(horizontal = 8.dp)
+            .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(10.dp))
             .clickable {
                 mainViewModel.playOrToggleSong(book)
                 mainViewModel.showPlayerFullScreen = true
@@ -93,15 +128,44 @@ fun BookItem(book: Book, mainViewModel: DetailsViewModel) {
     ) {
         Image(
             modifier = Modifier
-                .size(112.dp)
+                .size(120.dp)
                 .padding(4.dp)
-                .background(MaterialTheme.colors.primary, RoundedCornerShape(4.dp)),
+                .padding(bottom = 4.dp)
+                .background(MaterialTheme.colors.primaryVariant)
+                .clip(RoundedCornerShape(10.dp))
+            ,
             painter = rememberAsyncImagePainter(model = File(book.cover)),
             contentDescription = ""
         )
-        Column(Modifier.fillMaxSize()) {
-            Text(text = book.name, color = MaterialTheme.colors.secondary)
-            Text(text = book.name, color = MaterialTheme.colors.secondary)
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(8.dp),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.Start
+        ) {
+            Spacer(modifier = Modifier.size(8.dp))
+            Text(
+                book.name,
+                fontSize = 15.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colors.secondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+            )
+
+            Text(
+                book.author,
+                fontSize = 13.sp,
+                color = MaterialTheme.colors.secondary,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier
+                    .graphicsLayer {
+                        alpha = 0.60f
+                    }
+
+            )
         }
     }
 }
