@@ -31,7 +31,6 @@ fun DetailsScreen2(
     //backPressedDispatcher: OnBackPressedDispatcher,
     viewmodel: DetailsViewModel = hiltViewModel()
 ) {
-
     val state = viewmodel.state.value
     val book = state.book
     AnimatedVisibility(
@@ -94,8 +93,8 @@ fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
                     tint = MaterialTheme.colors.secondary,
                     modifier = Modifier
                         .padding(16.dp)
+                        .scale(.7f)
                         .padding(horizontal = 16.dp)
-                        .scale(1.2f)
                 )
             }
             IconButton(onClick = {  }) {
@@ -105,10 +104,15 @@ fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
                     tint = MaterialTheme.colors.secondary,
                     modifier = Modifier
                         .padding(16.dp)
+                        .scale(.7f)
                         .padding(horizontal = 16.dp)
-                        .scale(1.2f)
                 )
             }
+        }
+
+        Column(Modifier.fillMaxSize()) {
+            Box(modifier = Modifier.weight(3f))
+            Box(modifier = Modifier.weight(1f))
         }
 
         Text(text = book.name)

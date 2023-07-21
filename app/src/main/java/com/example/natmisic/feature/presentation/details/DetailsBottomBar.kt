@@ -53,10 +53,10 @@ fun DetailsBottomBar(
     )
 
     AnimatedVisibility(
-        visible = currentSong != null,
+        visible = detailsViewModel.state.value.book != null,
         modifier = modifier
     ) {
-        if (currentSong != null) {
+        if (detailsViewModel.state.value.book != null && currentSong != null) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()

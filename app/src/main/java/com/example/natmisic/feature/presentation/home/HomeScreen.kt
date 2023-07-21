@@ -90,7 +90,7 @@ fun TopBar(navController: NavHostController) {
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(onClick = { navController.popBackStack() }) {
+        IconButton(onClick = {  }) {
             Icon(
                 painter = painterResource(id = R.drawable.search_ic),
                 contentDescription = "",
