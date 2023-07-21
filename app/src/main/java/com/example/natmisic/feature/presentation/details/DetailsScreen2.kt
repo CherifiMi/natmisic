@@ -4,11 +4,12 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -22,6 +23,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
+import com.example.natmisic.feature.presentation.details.components.CoverTab
+import com.example.natmisic.feature.presentation.details.components.TranscriptTab
 
 
 @ExperimentalMaterialApi
@@ -52,7 +55,7 @@ fun DetailsScreen2(
 
 
 
-@OptIn(ExperimentalMaterialApi::class)
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
 fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
 
@@ -109,18 +112,24 @@ fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
                 )
             }
         }
+        val pagerState = rememberPagerState()
 
         Column(Modifier.fillMaxSize()) {
-            Box(modifier = Modifier.weight(3f))
-            Box(modifier = Modifier.weight(1f))
-        }
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(3f),
+                pageCount = 2,
+                state = pagerState
+            ) { tabIndex ->
+                when (tabIndex) {
+                    0 -> CoverTab(book.cover)
+                    1 -> TranscriptTab(book.timestamp)
+                }
+            }
+            Box(Modifier.weight(1f)) {
 
-        Text(text = book.name)
-        LazyColumn(Modifier.fillMaxSize()){
-            items(items = book.timestamp){
-                Text(text = it!!.time)
             }
         }
-
     }
 }
