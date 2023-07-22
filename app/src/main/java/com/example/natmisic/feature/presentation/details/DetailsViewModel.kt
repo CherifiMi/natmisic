@@ -146,8 +146,8 @@ class DetailsViewModel @Inject constructor(
                     }
                 }
             }
-            DetailsEvent.SkipToNextSong -> TODO()
-            DetailsEvent.SkipToPreviousSong -> TODO()
+            DetailsEvent.SkipToNextSong -> {}
+            DetailsEvent.SkipToPreviousSong -> {}
         }
     }
 

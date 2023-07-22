@@ -44,6 +44,7 @@ fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
     val context = LocalContext.current
     val playbackStateCompat by viewmodel.playbackState.observeAsState()
 
+
     Column(
         Modifier
             .fillMaxSize()
@@ -110,7 +111,9 @@ fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
                 .padding(horizontal = 70.dp)
         )
         Row(
-            Modifier.fillMaxSize().padding(horizontal = 40.dp),
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 40.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {

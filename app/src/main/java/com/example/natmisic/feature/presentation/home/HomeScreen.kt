@@ -93,7 +93,7 @@ fun HomeScreen(
                 item { 
                     Text(text = "Library", fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(16.dp))
                 }
-                items(state.books) { book ->
+                items(state.books.sortedBy { it.progress/it.duration }.reversed()) { book ->
                     BookItem(book, detailsViewModel)
                 }
                 item {
@@ -147,8 +147,10 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
         .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(10.dp))
         .clickable {
             detailsViewModel.onEvent(DetailsEvent.PlayOrToggleSong(book))
+            if (detailsViewModel.state.value.book?.id != book.id){
+                detailsViewModel.seekTo(book.progress.toFloat())
+            }
             detailsViewModel.showPlayerFullScreen = true
-            detailsViewModel.seekTo(book.progress.toFloat())
         }
     ) {
         Row(Modifier.fillMaxSize())
