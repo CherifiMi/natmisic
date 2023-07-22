@@ -3,6 +3,7 @@ package com.example.natmisic.feature.presentation.details
 import android.content.Context
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -25,6 +26,7 @@ import java.io.File
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+
 
 data class DetailsState(
     val book: Book? = null,
@@ -96,37 +98,39 @@ class DetailsViewModel @Inject constructor(
             is DetailsEvent.RecordAndSaveTranscript -> {
                 val book = event.book
                 val context = event.context
-                val timestamp = event.timestamp
+                val startTime = event.timestamp
+                val endTime = formatLong(event.timestamp.toTimeDateLong() + 10000)
 
+                Log.d(com.example.natmisic.core.util.TAG, "$startTime  $endTime")
                 val input = File(book.path)
-                val output =
-                    File(context.cacheDir, "output${(0..99999).random()}.${input.extension}")
+                val output = File(context.cacheDir, "output${(0..99999).random()}.${input.extension}")
 
                 _state.value = state.value.copy(prosessing = true)
 
-                viewModelScope.launch(Dispatchers.Default) {
+                viewModelScope.launch (Dispatchers.Default){
                     val rc =
-                        FFmpeg.execute("-i '${input.path}' -ss 00:01:20 -to 00:01:30 -c copy ${output.path}")
+                        FFmpeg.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
                     when (rc) {
                         RETURN_CODE_SUCCESS -> {
                             withContext(Dispatchers.Main) {
                                 Toast.makeText(
                                     context,
-                                    "Note saved at $timestamp",
+                                    "Note saved at $startTime",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             }
 
-                            // TODO: use stt
+                            // TODO: use stt on output file
 
-                            val stt =
-                                "I've tried this but the speechRecognizer stops recognizing after the first listen or doesn't listen at all sometimes"
 
+                            val stt = "I've tried this but the speechRecognizer stops recognizing after the first listen or doesn't listen at all sometimes"
+
+                            // ! save to db
                             val newBook = book.copy(
                                 timestamp = book.timestamp + Timestamp(
                                     id = book.id!!,
                                     stt,
-                                    timestamp
+                                    startTime
                                 )
                             )
                             useCases.updateBookById(newBook)
@@ -224,6 +228,10 @@ class DetailsViewModel @Inject constructor(
     fun formatLong(value: Long): String {
         val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
         return dateFormat.format(value)
+    }
+    fun String.toTimeDateLong(): Long {
+        val format = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        return format.parse(this)?.time ?: throw IllegalArgumentException("Invalid time string")
     }
 
     fun skipToNextSong() {

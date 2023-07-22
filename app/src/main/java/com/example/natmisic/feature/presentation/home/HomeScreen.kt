@@ -71,19 +71,6 @@ fun HomeScreen(
 
     viewModel.onEvent(HomeEvent.Init(context))
 
-    AnimatedVisibility(
-        visible = state.loading,
-        enter = fadeIn(),
-        exit = fadeOut() + scaleOut(targetScale = .1f)
-    ) {
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            LoadingBall()
-        }
-    }
-
     Box(
         modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center
     ) {
@@ -103,6 +90,19 @@ fun HomeScreen(
         }
         DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter), backPressedDispatcher)
         DetailsScreen(backPressedDispatcher)
+    }
+
+    AnimatedVisibility(
+        visible = state.loading,
+        enter = fadeIn(),
+        exit = fadeOut() + scaleOut(targetScale = .1f)
+    ) {
+        Box(
+            modifier = Modifier.fillMaxSize(),
+            contentAlignment = Alignment.Center
+        ) {
+            LoadingBall()
+        }
     }
 }
 

@@ -58,7 +58,7 @@ fun PageIII(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(vertical = 24.dp, horizontal = 100.dp)
         )
-        Text(
+        /*Text(
             text = stringResource(id = R.string.lorem),
             color = MaterialTheme.colors.secondary,
             fontSize = 16.sp,
@@ -66,7 +66,7 @@ fun PageIII(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 70.dp).padding(bottom = 48.dp),
             maxLines = 2
-        )
+        )*/
 
         Button(onClick = { activityResultLauncher.launch(intent) }, shape = RoundedCornerShape(40), border = BorderStroke(2.dp, MaterialTheme.colors.secondary))
         {
