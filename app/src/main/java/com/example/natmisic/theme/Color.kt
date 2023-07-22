@@ -9,6 +9,7 @@ val Teal200 = Color(0xFF03DAC5)
 
 
 val Blu = Color(0xFF65A1FF)
+val Grn = Color(0xFF7AFF7A)
 
 val Light = Color(0xFFFEFBFF)
 val LightAccent = Color(0xFFF1F0F7)

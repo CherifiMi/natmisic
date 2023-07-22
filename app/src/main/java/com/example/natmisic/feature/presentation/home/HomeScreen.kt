@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Size
@@ -38,6 +39,7 @@ import com.example.natmisic.feature.presentation.details.DetailsViewModel
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
 import com.example.natmisic.feature.presentation.util.Screens
 import com.example.natmisic.theme.Blu
+import com.example.natmisic.theme.Grn
 import java.io.File
 
 
@@ -87,7 +89,10 @@ fun HomeScreen(
     ) {
         Column(Modifier.fillMaxSize()) {
             TopBar(navController = navController)
-            LazyColumn(Modifier.fillMaxSize()) {
+            LazyColumn(Modifier.fillMaxSize().alpha(if (state.loading) 0f else 1f)) {
+                item { 
+                    Text(text = "Library", fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 16.dp))
+                }
                 items(state.books) { book ->
                     BookItem(book, detailsViewModel)
                 }
@@ -205,7 +210,9 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                             0,
                             5
                         ).replace(":", "h")
-                    }m left",
+                    }min left",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(end = 16.dp, bottom = 4.dp)
                 )
                 Box(
@@ -214,9 +221,9 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                         .height(4.dp)
                         .drawBehind {
                             drawRect(
-                                Blu,
+                                if(book.progress == book.duration) Grn else Blu,
                                 size = Size(
-                                    size.width * (book.progress / book.duration).toFloat(),
+                                    size.width * (book.progress.toFloat() / book.duration.toFloat()),
                                     size.height
                                 )
                             )
