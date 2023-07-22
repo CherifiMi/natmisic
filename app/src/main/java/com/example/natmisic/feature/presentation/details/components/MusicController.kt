@@ -161,7 +161,7 @@ fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
                     viewmodel.onEvent(
                         DetailsEvent.RecordAndSaveTranscript(
                             viewmodel.toBook(viewmodel.currentPlayingSong.value!!)!!,
-                            viewmodel.currentSongFormattedPosition,
+                            viewmodel.currentPlaybackFormattedPosition,
                             context
                         )
                     )

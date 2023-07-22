@@ -245,7 +245,7 @@ fun DetailsBottomBarItem(
                     detailsViewModel.onEvent(
                         DetailsEvent.RecordAndSaveTranscript(
                             detailsViewModel.toBook(detailsViewModel.currentPlayingSong.value!!)!!,
-                            detailsViewModel.currentSongFormattedPosition,
+                            detailsViewModel.currentPlaybackFormattedPosition,
                             context
                         )
                     )

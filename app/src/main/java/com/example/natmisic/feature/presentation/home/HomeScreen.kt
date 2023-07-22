@@ -91,7 +91,7 @@ fun HomeScreen(
             TopBar(navController = navController)
             LazyColumn(Modifier.fillMaxSize().alpha(if (state.loading) 0f else 1f)) {
                 item { 
-                    Text(text = "Library", fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(start = 16.dp))
+                    Text(text = "Library", fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(16.dp))
                 }
                 items(state.books) { book ->
                     BookItem(book, detailsViewModel)
@@ -204,7 +204,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
             ) {
                 Text(
                     text =
-                    if (book.duration == book.progress) "done"
+                    if (book.duration - book.progress < 1000) "done"
                     else "${
                         (detailsViewModel.formatLong((book.duration - book.progress).toLong())).substring(
                             0,
@@ -221,7 +221,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                         .height(4.dp)
                         .drawBehind {
                             drawRect(
-                                if(book.progress == book.duration) Grn else Blu,
+                                if(book.duration - book.progress < 1000) Grn else Blu,
                                 size = Size(
                                     size.width * (book.progress.toFloat() / book.duration.toFloat()),
                                     size.height
