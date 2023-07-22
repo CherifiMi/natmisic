@@ -1,11 +1,8 @@
 package com.example.natmisic.feature.presentation.details.components
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
-import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
@@ -13,8 +10,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
 import com.airbnb.lottie.compose.LottieAnimation
@@ -59,13 +58,15 @@ fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
                     viewmodel.currentPlaybackFormattedPosition,
-                    style = MaterialTheme.typography.body2
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp
                 )
             }
             CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
                 Text(
                     viewmodel.currentSongFormattedPosition,
-                    style = MaterialTheme.typography.body2
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp
                 )
             }
         }
@@ -87,94 +88,75 @@ fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
         )
         Text(
             text = state.book!!.name,
-            style = MaterialTheme.typography.h5,
             color = MaterialTheme.colors.secondary,
+            fontWeight = FontWeight.SemiBold,
+            fontSize = 20.sp,
             maxLines = 1,
-            overflow = TextOverflow.Ellipsis
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(horizontal = 40.dp)
         )
 
         Text(
             state.book.author,
-            style = MaterialTheme.typography.subtitle1,
+            fontWeight = FontWeight.Normal,
+            fontSize = 14.sp,
             color = MaterialTheme.colors.secondary,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.graphicsLayer {
-                alpha = 0.60f
-            }
+            modifier = Modifier
+                .graphicsLayer {
+                    alpha = 0.60f
+                }
+                .padding(horizontal = 70.dp)
         )
         Row(
-            Modifier
-                .weight(1.7f)
-                .fillMaxWidth()
-                .height(16.dp),
-            horizontalArrangement = Arrangement.SpaceAround,
+            Modifier.fillMaxSize().padding(horizontal = 40.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                painter = rememberAsyncImagePainter(model = R.drawable.play_back_ic),
-                contentDescription = "",
-                tint = MaterialTheme.colors.secondary,
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .scale(0.9f)
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = rememberRipple(
-                            bounded = false,
-                            radius = 24.dp
-                        )
-                    ) { viewmodel.onEvent(DetailsEvent.Back) },
-            )
-            Icon(
-                painter = rememberAsyncImagePainter(
-                    model = if (playbackStateCompat?.isPlaying == false) {
-                        R.drawable.play_ic
-                    } else {
-                        R.drawable.play_puase_ic
-                    }
-                ),
-                tint = MaterialTheme.colors.secondary,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = rememberRipple(
-                            bounded = false,
-                            radius = 24.dp
-                        )
-                    ) { viewmodel.onEvent(DetailsEvent.PlayOrToggleSong(book!!, true)) },
-            )
-            Icon(
-                painter = rememberAsyncImagePainter(model = R.drawable.play_skip_ic),
-                tint = MaterialTheme.colors.secondary,
-                contentDescription = "",
-                modifier = Modifier
-                    .padding(end = 16.dp)
-                    .scale(0.9f)
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = rememberRipple(
-                            bounded = false,
-                            radius = 24.dp
-                        )
-                    ) { viewmodel.onEvent(DetailsEvent.Skip) },
-            )
+            IconButton(
+                modifier = Modifier.weight(1f),
+                onClick = { viewmodel.onEvent(DetailsEvent.Back) })
+            {
+                Icon(
+                    painter = rememberAsyncImagePainter(model = R.drawable.play_back_ic),
+                    contentDescription = "",
+                    tint = MaterialTheme.colors.secondary
+                )
+            }
+            IconButton(
+                modifier = Modifier.weight(1f),
+                onClick = { viewmodel.onEvent(DetailsEvent.PlayOrToggleSong(book!!, true)) })
+            {
+                Icon(
+                    painter = rememberAsyncImagePainter(
+                        model = if (playbackStateCompat?.isPlaying == false) {
+                            R.drawable.play_ic
+                        } else {
+                            R.drawable.play_puase_ic
+                        }
+                    ),
+                    tint = MaterialTheme.colors.secondary,
+                    contentDescription = ""
+                )
+            }
+            IconButton(
+                modifier = Modifier.weight(1f),
+                onClick = { viewmodel.onEvent(DetailsEvent.Skip)})
+            {
+                Icon(
+                    painter = rememberAsyncImagePainter(model = R.drawable.play_skip_ic),
+                    tint = MaterialTheme.colors.secondary,
+                    contentDescription = ""
+                )
+            }
             val composition by rememberLottieComposition(
                 if (!isSystemInDarkTheme()) LottieCompositionSpec.RawRes(
                     R.raw.lr_dark
                 ) else LottieCompositionSpec.RawRes(R.raw.lr_light)
             )
             IconButton(
-                modifier = Modifier
-                    .padding(end = 16.dp),
+                modifier = Modifier.weight(1f),
                 onClick = {
                     viewmodel.onEvent(
                         DetailsEvent.RecordAndSaveTranscript(
@@ -192,8 +174,8 @@ fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
                     reverseOnRepeat = true,
                     iterations = LottieConstants.IterateForever,
                     alignment = Alignment.Center,
-                    modifier = Modifier.scale(2.5f)
-                )
+                    modifier = Modifier.scale(.7f)
+                    )
 
             }
         }
