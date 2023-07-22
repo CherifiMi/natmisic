@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.musicplayer.exoplayer
 
 import android.net.Uri

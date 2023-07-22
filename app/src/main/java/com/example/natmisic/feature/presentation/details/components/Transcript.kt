@@ -30,6 +30,7 @@ fun TranscriptTab(timestamp: List<Timestamp?>) {
             }
             items(timestamp) {
                 Text(
+                    lineHeight = 20.sp,
                     text = it!!.text,
                     color = MaterialTheme.colors.secondary,
                     fontWeight = FontWeight.Bold,

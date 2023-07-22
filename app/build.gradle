@@ -9,6 +9,10 @@ android {
     namespace 'com.example.natmisic'
     compileSdk 33
 
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
+
     defaultConfig {
         applicationId "com.example.natmisic"
         minSdk 24

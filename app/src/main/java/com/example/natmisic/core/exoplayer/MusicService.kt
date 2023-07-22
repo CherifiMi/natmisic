@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package com.example.natmisic.core.exoplayer
 
 import android.app.PendingIntent
