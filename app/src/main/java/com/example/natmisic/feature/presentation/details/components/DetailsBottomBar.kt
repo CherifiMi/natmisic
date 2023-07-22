@@ -8,6 +8,7 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
@@ -29,6 +30,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import coil.compose.rememberAsyncImagePainter
+import com.airbnb.lottie.compose.LottieAnimation
+import com.airbnb.lottie.compose.LottieCompositionSpec
+import com.airbnb.lottie.compose.LottieConstants
+import com.airbnb.lottie.compose.rememberLottieComposition
 import com.example.musicplayer.exoplayer.isPlaying
 import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
@@ -145,7 +150,9 @@ fun DetailsBottomBarItem(
             Modifier
                 .weight(1.7f)
                 .fillMaxWidth()
-                .height(16.dp), horizontalArrangement = Arrangement.SpaceEvenly
+                .height(16.dp),
+            horizontalArrangement = Arrangement.End,
+            verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(
                 painter = rememberAsyncImagePainter(model = R.drawable.play_back_ic),
@@ -162,11 +169,7 @@ fun DetailsBottomBarItem(
                             bounded = false,
                             radius = 24.dp
                         )
-                    ) {
-                        detailsViewModel.currentPlaybackPosition.let { currentPosition ->
-                            detailsViewModel.seekTo(if (currentPosition - 15 * 1000f < 0) 0f else currentPosition - 15 * 1000f)
-                        }
-                    },
+                    ) { detailsViewModel.onEvent(DetailsEvent.Back) },
             )
             Icon(
                 painter = rememberAsyncImagePainter(
@@ -188,7 +191,7 @@ fun DetailsBottomBarItem(
                             bounded = false,
                             radius = 24.dp
                         )
-                    ) { detailsViewModel.playOrToggleSong(book, true) },
+                    ) { detailsViewModel.onEvent(DetailsEvent.PlayOrToggleSong(book, true)) },
             )
             Icon(
                 painter = rememberAsyncImagePainter(model = R.drawable.play_skip_ic),
@@ -205,36 +208,37 @@ fun DetailsBottomBarItem(
                             bounded = false,
                             radius = 24.dp
                         )
-                    ) {
-                        detailsViewModel.currentPlaybackPosition.let { currentPosition ->
-                            detailsViewModel.seekTo(currentPosition + 15 * 1000f)
-                        }
-                    },
+                    ) { detailsViewModel.onEvent(DetailsEvent.Skip) },
             )
-            Icon(
-                painter = rememberAsyncImagePainter(model = R.drawable.recording),
-                tint = MaterialTheme.colors.secondary,
-                contentDescription = "",
+            val composition by rememberLottieComposition(
+                if (!isSystemInDarkTheme()) LottieCompositionSpec.RawRes(
+                    R.raw.lr_dark
+                ) else LottieCompositionSpec.RawRes(R.raw.lr_light)
+            )
+            IconButton(
                 modifier = Modifier
-                    .padding(end = 16.dp)
-                    .clickable(
-                        interactionSource = remember {
-                            MutableInteractionSource()
-                        },
-                        indication = rememberRipple(
-                            bounded = false,
-                            radius = 24.dp
+                    .padding(end = 16.dp),
+                onClick = {
+                    detailsViewModel.onEvent(
+                        DetailsEvent.RecordAndSaveTranscript(
+                            detailsViewModel.toBook(detailsViewModel.currentPlayingSong.value!!)!!,
+                            detailsViewModel.currentSongFormattedPosition,
+                            context
                         )
-                    ) {
-                        detailsViewModel.onEvent(
-                            DetailsEvent.RecordAndSaveTranscript(
-                                detailsViewModel.toBook(detailsViewModel.currentPlayingSong.value!!)!!,
-                                detailsViewModel.currentSongFormattedPosition,
-                                context
-                            )
-                        )
-                    },
-            )
+                    )
+                }
+            ) {
+                LottieAnimation(
+                    composition = composition,
+                    isPlaying = detailsViewModel.state.value.prosessing,
+                    restartOnPlay = true,
+                    reverseOnRepeat = true,
+                    iterations = LottieConstants.IterateForever,
+                    alignment = Alignment.Center,
+                    modifier = Modifier.scale(2.5f)
+                )
+
+            }
         }
     }
 }

@@ -27,15 +27,21 @@ import java.util.*
 import javax.inject.Inject
 
 data class DetailsState(
-    val book: Book? = null
+    val book: Book? = null,
+    val prosessing: Boolean = false
 )
+
 sealed class DetailsEvent {
-    sealed class PlayOrToggleSong(): DetailsEvent()
-    sealed class Back(): DetailsEvent()
-    sealed class Skip(): DetailsEvent()
-    sealed class SkipToNextSong(): DetailsEvent()
-    sealed class SkipToPreviousSong(): DetailsEvent()
-    data class RecordAndSaveTranscript(val book: Book, val timestamp: String, val context: Context): DetailsEvent()
+    data class PlayOrToggleSong(val mediaItem: Book, val toggle: Boolean = false) : DetailsEvent()
+    object Back : DetailsEvent()
+    object Skip : DetailsEvent()
+    object SkipToNextSong : DetailsEvent()
+    object SkipToPreviousSong : DetailsEvent()
+    data class RecordAndSaveTranscript(
+        val book: Book,
+        val timestamp: String,
+        val context: Context
+    ) : DetailsEvent()
 }
 
 
@@ -51,6 +57,31 @@ class DetailsViewModel @Inject constructor(
     fun onEvent(event: DetailsEvent) {
         when (event) {
             is DetailsEvent.PlayOrToggleSong -> {
+                val mediaItem = event.mediaItem
+                val toggle = event.toggle
+
+                updateCurrentBookState(mediaItem.id!!)
+                val isPrepared = playbackState.value?.isPrepared ?: false
+                if (isPrepared && mediaItem.id.toString() ==
+                    currentPlayingSong.value?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
+                ) {
+                    playbackState.value?.let { playbackState ->
+                        when {
+                            playbackState.isPlaying -> {
+                                if (toggle) musicServiceConnection.transportController.pause()
+                            }
+                            playbackState.isPlayEnabled -> {
+                                musicServiceConnection.transportController.play()
+                            }
+                            else -> Unit
+                        }
+                    }
+                } else {
+                    musicServiceConnection.transportController.playFromMediaId(
+                        mediaItem.id.toString(),
+                        null
+                    )
+                }
 
             }
             is DetailsEvent.Skip -> {
@@ -69,19 +100,28 @@ class DetailsViewModel @Inject constructor(
                 val timestamp = event.timestamp
 
                 val input = File(book.path)
-                val output = File(context.cacheDir, "output${(0..99999).random()}.${input.extension}")
+                val output =
+                    File(context.cacheDir, "output${(0..99999).random()}.${input.extension}")
+
+                _state.value = state.value.copy(prosessing = true)
 
                 viewModelScope.launch(Dispatchers.Default) {
-                    val rc = FFmpeg.execute("-i '${input.path}' -ss 00:01:20 -to 00:01:30 -c copy ${output.path}")
+                    val rc =
+                        FFmpeg.execute("-i '${input.path}' -ss 00:01:20 -to 00:01:30 -c copy ${output.path}")
                     when (rc) {
                         RETURN_CODE_SUCCESS -> {
-                            withContext(Dispatchers.Main){
-                                Toast.makeText(context, "Note saved at $timestamp", Toast.LENGTH_SHORT).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(
+                                    context,
+                                    "Note saved at $timestamp",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
 
                             // TODO: use stt
 
-                            val stt = "I've tried this but the speechRecognizer stops recognizing after the first listen or doesn't listen at all sometimes"
+                            val stt =
+                                "I've tried this but the speechRecognizer stops recognizing after the first listen or doesn't listen at all sometimes"
 
                             val newBook = book.copy(
                                 timestamp = book.timestamp + Timestamp(
@@ -94,16 +134,21 @@ class DetailsViewModel @Inject constructor(
                             updateCurrentBookState(newBook.id!!)
 
                             output.delete()
+                            _state.value = state.value.copy(prosessing = false)
                         }
                         else -> {
-                            withContext(Dispatchers.Main){
-                                Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT).show()
+                            withContext(Dispatchers.Main) {
+                                Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT)
+                                    .show()
                             }
                             output.delete()
+                            _state.value = state.value.copy(prosessing = false)
                         }
                     }
                 }
             }
+            DetailsEvent.SkipToNextSong -> TODO()
+            DetailsEvent.SkipToPreviousSong -> TODO()
         }
     }
 
@@ -236,9 +281,9 @@ class DetailsViewModel @Inject constructor(
     }
 
     fun updateCurrentBookState(id: Int) {
-        viewModelScope.launch(Dispatchers.IO){
+        viewModelScope.launch(Dispatchers.IO) {
             val book = useCases.getBookById(id)
-            withContext(Dispatchers.Main){
+            withContext(Dispatchers.Main) {
                 _state.value = state.value.copy(book = book)
             }
         }

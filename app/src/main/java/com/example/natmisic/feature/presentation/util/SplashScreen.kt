@@ -19,7 +19,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.navigation.NavHostController
 import com.example.natmisic.MainViewModel
 import com.example.natmisic.R
-import kotlinx.coroutines.delay
 
 @Composable
 fun SplashScreen(navController: NavHostController, viewModel: MainViewModel) {
@@ -33,8 +32,8 @@ fun SplashScreen(navController: NavHostController, viewModel: MainViewModel) {
                 OvershootInterpolator(2f).getInterpolation(it)
             })
         )
-        delay(500)
         navController.navigate(if (viewModel.hasRootFolder()) Screens.HOME.name else Screens.FOLDER_PICKER.name)
+        navController.clearBackStack(Screens.SPLASH.name)
     }
     Box(
         modifier = Modifier

@@ -2,6 +2,7 @@ package com.example.natmisic.feature.presentation.home
 
 import android.os.Build
 import androidx.activity.OnBackPressedDispatcher
+import androidx.activity.compose.BackHandler
 import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.foundation.Image
@@ -28,6 +29,7 @@ import androidx.navigation.NavHostController
 import coil.compose.rememberAsyncImagePainter
 import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
+import com.example.natmisic.feature.presentation.details.DetailsEvent
 import com.example.natmisic.feature.presentation.details.DetailsScreen2
 import com.example.natmisic.feature.presentation.details.DetailsViewModel
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
@@ -44,6 +46,12 @@ fun HomeScreen(
     detailsViewModel: DetailsViewModel = hiltViewModel(),
     backPressedDispatcher: OnBackPressedDispatcher
 ) {
+    BackHandler {
+        if (detailsViewModel.showPlayerFullScreen){
+            detailsViewModel.showPlayerFullScreen = false
+        }
+    }
+
     val state = viewModel.state.value
     val context = LocalContext.current
 
@@ -113,7 +121,7 @@ fun TopBar(navController: NavHostController) {
     }
 }
 @Composable
-fun BookItem(book: Book, mainViewModel: DetailsViewModel) {
+fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -122,8 +130,8 @@ fun BookItem(book: Book, mainViewModel: DetailsViewModel) {
             .padding(horizontal = 8.dp)
             .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(10.dp))
             .clickable {
-                mainViewModel.playOrToggleSong(book)
-                mainViewModel.showPlayerFullScreen = true
+                detailsViewModel.onEvent(DetailsEvent.PlayOrToggleSong(book))
+                detailsViewModel.showPlayerFullScreen = true
             }
     ) {
         Image(
