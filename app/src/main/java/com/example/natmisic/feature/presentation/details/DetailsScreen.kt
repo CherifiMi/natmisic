@@ -1,179 +1,52 @@
 package com.example.natmisic.feature.presentation.details
 
-import android.net.Uri
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
-import androidx.annotation.DrawableRes
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
-import androidx.compose.foundation.Image
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
-import androidx.compose.ui.graphics.*
-import androidx.compose.ui.graphics.painter.Painter
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.LocalConfiguration
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.ImageLoader
-import coil.compose.rememberAsyncImagePainter
-import coil.request.ImageRequest
 import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
-import java.io.File
-import kotlin.math.roundToInt
+import com.example.natmisic.feature.presentation.details.components.CoverTab
+import com.example.natmisic.feature.presentation.details.components.MusicController
+import com.example.natmisic.feature.presentation.details.components.TranscriptTab
 
 
 @ExperimentalMaterialApi
-@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun DetailsScreen(
     backPressedDispatcher: OnBackPressedDispatcher,
-    songViewModel: DetailsViewModel = hiltViewModel()
+    viewmodel: DetailsViewModel = hiltViewModel()
 ) {
-    val book = songViewModel.currentPlayingSong.value
-    AnimatedVisibility(
-        visible = book != null && songViewModel.showPlayerFullScreen,
-        enter = slideInVertically(
-            initialOffsetY = { it }
-        ),
-        exit = slideOutVertically(
-            targetOffsetY = { it }
-        )) {
-        if (book != null) {
-            SongScreenBody(
-                book = songViewModel.toBook(book)!!,
-                backPressedDispatcher = backPressedDispatcher,
-                songViewModel = songViewModel
-            )
-        }
-    }
-}
-
-@ExperimentalMaterialApi
-@Composable
-fun SongScreenBody(
-    book: Book,
-    backPressedDispatcher: OnBackPressedDispatcher,
-    songViewModel: DetailsViewModel
-) {
-    val swipeableState = rememberSwipeableState(initialValue = 0)
-    val endAnchor = LocalConfiguration.current.screenHeightDp * LocalDensity.current.density
-    val anchors = mapOf(
-        0f to 0,
-        endAnchor to 1
-    )
-
     val backCallback = remember {
         object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                songViewModel.showPlayerFullScreen = false
+                viewmodel.showPlayerFullScreen = false
             }
         }
-    }
-
-    val backgroundColor = MaterialTheme.colors.background
-
-    var dominantColor by remember {
-        mutableStateOf(backgroundColor)
-    }
-
-    val context = LocalContext.current
-
-    val imageLoader = ImageLoader(context)
-
-    val request = ImageRequest.Builder(context)
-        .data(Uri.fromFile(File(book.cover)).toString())
-        .build()
-
-    val imagePainter = rememberAsyncImagePainter(model = File(book.cover))
-
-    val iconResId =
-        if (songViewModel.songIsPlaying) R.drawable.ic_round_pause else R.drawable.ic_round_play_arrow
-
-    val isSongPlaying = songViewModel.songIsPlaying
-
-    var sliderIsChanging by remember { mutableStateOf(false) }
-
-    var localSliderValue by remember { mutableStateOf(0f) }
-
-    var localSongValue by remember {
-        mutableStateOf(0f)
-    }
-
-    val sliderProgress =
-        if (sliderIsChanging) localSliderValue else songViewModel.currentPlayerPosition
-
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(backgroundColor)
-            .swipeable(
-                state = swipeableState,
-                anchors = anchors,
-                thresholds = { _, _ -> FractionalThreshold(0.34f) },
-                orientation = Orientation.Vertical
-            )
-    ) {
-        if (swipeableState.currentValue >= 1) {
-            LaunchedEffect("key") {
-                songViewModel.showPlayerFullScreen = false
-            }
-        }
-        SongScreenContent(
-            book = book,
-            isSongPlaying = isSongPlaying,
-            imagePainter = imagePainter,
-            dominantColor = dominantColor,
-            playbackProgress = sliderProgress,
-            currentTime = songViewModel.currentPlaybackFormattedPosition,
-            totalTime = songViewModel.currentSongFormattedPosition,
-            playPauseIcon = iconResId,
-            yOffset = swipeableState.offset.value.roundToInt(),
-            playOrToggleSong = { songViewModel.playOrToggleSong(book, true) },
-            playNextSong = { songViewModel.skipToNextSong() },
-            playPreviousSong = { songViewModel.skipToPreviousSong() },
-            onSliderChange = { newPosition ->
-                localSliderValue = newPosition
-                sliderIsChanging = true
-            },
-            onSliderChangeFinished = {
-                songViewModel.seekTo(songViewModel.currentSongDuration * localSliderValue)
-                sliderIsChanging = false
-            },
-            onForward = {
-                songViewModel.currentPlaybackPosition.let { currentPosition ->
-                    songViewModel.seekTo(currentPosition + 10 * 1000f)
-                }
-            },
-            onRewind = {
-                songViewModel.currentPlaybackPosition.let { currentPosition ->
-                    songViewModel.seekTo(if (currentPosition - 10 * 1000f < 0) 0f else currentPosition - 10 * 1000f)
-                }
-            },
-            onClose = {
-                songViewModel.showPlayerFullScreen = false
-            }
-        )
     }
 
     LaunchedEffect("playbackPosition") {
-        songViewModel.updateCurrentPlaybackPosition()
+        viewmodel.updateCurrentPlaybackPosition()
     }
 
     DisposableEffect(backPressedDispatcher) {
@@ -181,297 +54,108 @@ fun SongScreenBody(
 
         onDispose {
             backCallback.remove()
-            songViewModel.showPlayerFullScreen = false
+            viewmodel.showPlayerFullScreen = false
+        }
+    }
+
+
+    val state = viewmodel.state.value
+    val book = state.book
+    AnimatedVisibility(
+        visible = book != null && viewmodel.showPlayerFullScreen,
+        enter = slideInVertically(
+            initialOffsetY = { it }
+        ),
+        exit = slideOutVertically(
+            targetOffsetY = { it }
+        )) {
+        if (book != null) {
+            DetailsBody(
+                book = book,
+                viewmodel = viewmodel
+            )
         }
     }
 }
 
+
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun SongScreenContent(
-    book: Book,
-    isSongPlaying: Boolean,
-    imagePainter: Painter,
-    dominantColor: Color,
-    playbackProgress: Float,
-    currentTime: String,
-    totalTime: String,
-    @DrawableRes playPauseIcon: Int,
-    yOffset: Int,
-    playOrToggleSong: () -> Unit,
-    playNextSong: () -> Unit,
-    playPreviousSong: () -> Unit,
-    onSliderChange: (Float) -> Unit,
-    onSliderChangeFinished: () -> Unit,
-    onRewind: () -> Unit,
-    onForward: () -> Unit,
-    onClose: () -> Unit
+fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
 
-) {
-
-
-    val gradientColors = if (isSystemInDarkTheme()) {
-        listOf(
-            dominantColor,
-            MaterialTheme.colors.background
-        )
-    } else {
-        listOf(
-            MaterialTheme.colors.background,
-            MaterialTheme.colors.background
-        )
-    }
-
-    val sliderColors = if (isSystemInDarkTheme()) {
-        SliderDefaults.colors(
-            thumbColor = MaterialTheme.colors.onBackground,
-            activeTrackColor = MaterialTheme.colors.onBackground,
-            inactiveTrackColor = MaterialTheme.colors.onBackground.copy(
-                alpha = ProgressIndicatorDefaults.IndicatorBackgroundOpacity
-            ),
-        )
-    } else SliderDefaults.colors(
-        thumbColor = dominantColor,
-        activeTrackColor = dominantColor,
-        inactiveTrackColor = dominantColor.copy(
-            alpha = ProgressIndicatorDefaults.IndicatorBackgroundOpacity
-        ),
+    val swipeableState = rememberSwipeableState(initialValue = 0)
+    val endAnchor = LocalConfiguration.current.screenHeightDp * LocalDensity.current.density
+    val anchors = mapOf(
+        0f to 0,
+        endAnchor to 1
     )
 
-    Box(
-        modifier = Modifier
+    Column(
+        Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colors.primary)
+
     ) {
-        Surface {
-            Box(
-                modifier = Modifier
-                    .background(
-                        Brush.verticalGradient(
-                            colors = gradientColors,
-                            endY = LocalConfiguration.current.screenHeightDp.toFloat() * LocalDensity.current.density
-                        )
-                    )
-                    .fillMaxSize()
-                    .systemBarsPadding()
-            ) {
-                Column {
-                    IconButton(
-                        onClick = onClose
-                    ) {
-                        Image(
-                            imageVector = Icons.Rounded.KeyboardArrowDown,
-                            contentDescription = "Close",
-                            colorFilter = ColorFilter.tint(LocalContentColor.current)
-                        )
-                    }
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 24.dp)
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .padding(vertical = 32.dp)
-                                .clip(MaterialTheme.shapes.medium)
-                                .weight(1f, fill = false)
-                                .aspectRatio(1f)
-
-                        ) {
-//                            Image(
-//                                painter = imagePainter,
-//                                contentDescription = "Song thumbnail",
-//                                contentScale = ContentScale.Crop,
-//                                modifier = Modifier
-//                                    .fillMaxSize()
-//                            )
-                            VinylAnimation(painter = imagePainter, isSongPlaying = isSongPlaying)
-                        }
-
-                        Text(
-                            text = book.name,
-                            style = MaterialTheme.typography.h5,
-                            color = MaterialTheme.colors.onBackground,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-
-                        Text(
-                            book.author,
-                            style = MaterialTheme.typography.subtitle1,
-                            color = MaterialTheme.colors.onBackground,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.graphicsLayer {
-                                alpha = 0.60f
-                            }
-                        )
-
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 24.dp)
-                        ) {
-                            Slider(
-                                value = playbackProgress,
-                                modifier = Modifier
-                                    .fillMaxWidth(),
-                                colors = sliderColors,
-                                onValueChange = onSliderChange,
-                                onValueChangeFinished = onSliderChangeFinished
-                            )
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                                    Text(
-                                        currentTime,
-                                        style = MaterialTheme.typography.body2
-                                    )
-                                }
-                                CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                                    Text(
-                                        totalTime,
-                                        style = MaterialTheme.typography.body2
-                                    )
-                                }
-                            }
-                        }
-
-                        Row(
-                            horizontalArrangement = Arrangement.SpaceAround,
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                        ) {
-                            Icon(
-                                imageVector = Icons.Rounded.SkipPrevious,
-                                contentDescription = "Skip Previous",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable(onClick = playPreviousSong)
-                                    .padding(12.dp)
-                                    .size(32.dp)
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.Replay10,
-                                contentDescription = "Replay 10 seconds",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable(onClick = onRewind)
-                                    .padding(12.dp)
-                                    .size(32.dp)
-                            )
-                            Icon(
-                                painter = painterResource(playPauseIcon),
-                                contentDescription = "Play",
-                                tint = MaterialTheme.colors.background,
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colors.onBackground)
-                                    .clickable(onClick = playOrToggleSong)
-                                    .size(64.dp)
-                                    .padding(8.dp)
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.Forward10,
-                                contentDescription = "Forward 10 seconds",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable(onClick = onForward)
-                                    .padding(12.dp)
-                                    .size(32.dp)
-                            )
-                            Icon(
-                                imageVector = Icons.Rounded.SkipNext,
-                                contentDescription = "Skip Next",
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .clickable(onClick = playNextSong)
-                                    .padding(12.dp)
-                                    .size(32.dp)
-                            )
-                        }
-                    }
-                }
+        if (swipeableState.currentValue >= 1) {
+            LaunchedEffect("key") {
+                viewmodel.showPlayerFullScreen = false
             }
         }
-    }
-}
-
-@Composable
-fun Vinyl(
-    modifier: Modifier = Modifier,
-    rotationDegrees: Float = 0f,
-    painter: Painter
-) {
-    Box(
-        modifier = modifier
-            .aspectRatio(1.0f)
-    ) {
-        // Vinyl background
-        Image(
-            modifier = Modifier
-                .fillMaxSize()
-                .rotate(rotationDegrees),
-            painter = painterResource(id = R.drawable.vinyl_background),
-            contentDescription = "Vinyl Background"
-        )
-
-        // Vinyl song cover
-        Image(
-            modifier = Modifier
-                .fillMaxSize(0.5f)
-                .rotate(rotationDegrees)
-                .aspectRatio(1.0f)
-                .align(Alignment.Center),
-            painter = painter,
-            contentDescription = "Song cover"
-        )
-    }
-}
-
-@Composable
-fun VinylAnimation(
-    modifier: Modifier = Modifier,
-    isSongPlaying: Boolean = true,
-    painter: Painter
-) {
-    var currentRotation by remember {
-        mutableStateOf(0f)
-    }
-
-    val rotation = remember {
-        Animatable(currentRotation)
-    }
-
-    LaunchedEffect(isSongPlaying) {
-        if (isSongPlaying) {
-            rotation.animateTo(
-                targetValue = currentRotation + 360f,
-                animationSpec = infiniteRepeatable(
-                    animation = tween(3000, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart
+        Row(
+            Modifier
+                .height(56.dp)
+                .fillMaxWidth()
+                .swipeable(
+                    state = swipeableState,
+                    anchors = anchors,
+                    thresholds = { _, _ -> FractionalThreshold(0.34f) },
+                    orientation = Orientation.Vertical
+                ),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            IconButton(onClick = { viewmodel.showPlayerFullScreen = false }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.down_pointer),
+                    contentDescription = "",
+                    tint = MaterialTheme.colors.secondary,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .scale(.7f)
+                        .padding(horizontal = 16.dp)
                 )
-            ) {
-                currentRotation = value
             }
-        } else {
-            if (currentRotation > 0f) {
-                rotation.animateTo(
-                    targetValue = currentRotation + 50,
-                    animationSpec = tween(
-                        1250,
-                        easing = LinearOutSlowInEasing
-                    )
-                ) {
-                    currentRotation = value
+            IconButton(onClick = {  }) {
+                Icon(
+                    painter = painterResource(id = R.drawable.menu),
+                    contentDescription = "",
+                    tint = MaterialTheme.colors.secondary,
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .scale(.7f)
+                        .padding(horizontal = 16.dp)
+                )
+            }
+        }
+        val pagerState = rememberPagerState()
+
+        Column(Modifier.fillMaxSize()) {
+            HorizontalPager(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(3f),
+                pageCount = 2,
+                state = pagerState
+            ) { tabIndex ->
+                when (tabIndex) {
+                    0 -> CoverTab(book.cover)
+                    1 -> TranscriptTab(book.timestamp)
                 }
+            }
+            Box(Modifier.weight(1.5f)) {
+                MusicController()
             }
         }
     }
-
-    Vinyl(painter = painter, rotationDegrees = rotation.value)
 }
-
-

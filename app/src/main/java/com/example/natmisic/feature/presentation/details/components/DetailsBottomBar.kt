@@ -2,6 +2,8 @@ package com.example.natmisic.feature.presentation.home
 
 
 import android.support.v4.media.session.PlaybackStateCompat
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.*
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -12,10 +14,8 @@ import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.ripple.rememberRipple
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.runtime.livedata.observeAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,10 +45,33 @@ import java.io.File
 @Composable
 fun DetailsBottomBar(
     modifier: Modifier = Modifier,
-    detailsViewModel: DetailsViewModel = hiltViewModel()
+    backPressedDispatcher: OnBackPressedDispatcher,
+    viewmodel: DetailsViewModel = hiltViewModel()
 ) {
-    val currentSong = detailsViewModel.currentPlayingSong.value
-    val playbackStateCompat by detailsViewModel.playbackState.observeAsState()
+
+    val backCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                viewmodel.showPlayerFullScreen = false
+            }
+        }
+    }
+
+    LaunchedEffect("playbackPosition") {
+        viewmodel.updateCurrentPlaybackPosition()
+    }
+
+    DisposableEffect(backPressedDispatcher) {
+        backPressedDispatcher.addCallback(backCallback)
+
+        onDispose {
+            backCallback.remove()
+            viewmodel.showPlayerFullScreen = false
+        }
+    }
+
+    val currentSong = viewmodel.currentPlayingSong.value
+    val playbackStateCompat by viewmodel.playbackState.observeAsState()
 
 
     val colorStops = arrayOf(
@@ -58,10 +81,10 @@ fun DetailsBottomBar(
     )
 
     AnimatedVisibility(
-        visible = detailsViewModel.state.value.book != null,
+        visible = viewmodel.state.value.book != null,
         modifier = modifier
     ) {
-        if (detailsViewModel.state.value.book != null && currentSong != null) {
+        if (viewmodel.state.value.book != null && currentSong != null) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -70,9 +93,9 @@ fun DetailsBottomBar(
                 contentAlignment = Alignment.BottomCenter
             ) {
                 DetailsBottomBarItem(
-                    book = detailsViewModel.toBook(currentSong)!!,
+                    book = viewmodel.toBook(currentSong)!!,
                     playbackStateCompat = playbackStateCompat,
-                    detailsViewModel = detailsViewModel,
+                    detailsViewModel = viewmodel,
                 )
             }
         }

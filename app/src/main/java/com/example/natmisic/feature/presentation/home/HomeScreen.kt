@@ -14,9 +14,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -30,10 +33,11 @@ import coil.compose.rememberAsyncImagePainter
 import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.presentation.details.DetailsEvent
-import com.example.natmisic.feature.presentation.details.DetailsScreen2
+import com.example.natmisic.feature.presentation.details.DetailsScreen
 import com.example.natmisic.feature.presentation.details.DetailsViewModel
 import com.example.natmisic.feature.presentation.home.components.LoadingBall
 import com.example.natmisic.feature.presentation.util.Screens
+import com.example.natmisic.theme.Blu
 import java.io.File
 
 
@@ -47,8 +51,16 @@ fun HomeScreen(
     backPressedDispatcher: OnBackPressedDispatcher
 ) {
     BackHandler {
-        if (detailsViewModel.showPlayerFullScreen){
+        if (detailsViewModel.showPlayerFullScreen) {
             detailsViewModel.showPlayerFullScreen = false
+        }
+    }
+
+    LaunchedEffect(detailsViewModel.currentPlaybackFormattedPosition) {
+        if (detailsViewModel.currentPlaybackFormattedPosition.takeLast(2) == "00") {
+            detailsViewModel.currentPlayingSong.value?.let { detailsViewModel.toBook(it) }?.let {
+                detailsViewModel.saveProgress(detailsViewModel.currentPlaybackPosition, it)
+            }
         }
     }
 
@@ -84,9 +96,8 @@ fun HomeScreen(
                 }
             }
         }
-        DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter))
-        DetailsScreen2()
-        //DetailsScreen(backPressedDispatcher)
+        DetailsBottomBar(modifier = Modifier.align(Alignment.BottomCenter), backPressedDispatcher)
+        DetailsScreen(backPressedDispatcher)
     }
 }
 
@@ -98,7 +109,7 @@ fun TopBar(navController: NavHostController) {
             .fillMaxWidth(),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        IconButton(onClick = {  }) {
+        IconButton(onClick = { }) {
             Icon(
                 painter = painterResource(id = R.drawable.search_ic),
                 contentDescription = "",
@@ -120,60 +131,100 @@ fun TopBar(navController: NavHostController) {
         }
     }
 }
+
 @Composable
 fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .wrapContentHeight()
-            .padding(8.dp)
-            .padding(horizontal = 8.dp)
-            .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(10.dp))
-            .clickable {
-                detailsViewModel.onEvent(DetailsEvent.PlayOrToggleSong(book))
-                detailsViewModel.showPlayerFullScreen = true
-            }
-    ) {
-        Image(
-            modifier = Modifier
-                .size(120.dp)
-                .padding(4.dp)
-                .padding(bottom = 4.dp)
-                .background(MaterialTheme.colors.primaryVariant)
-                .clip(RoundedCornerShape(10.dp))
-            ,
-            painter = rememberAsyncImagePainter(model = File(book.cover)),
-            contentDescription = ""
-        )
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(8.dp),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.Start
-        ) {
-            Spacer(modifier = Modifier.size(8.dp))
-            Text(
-                book.name,
-                fontSize = 15.sp,
-                fontWeight = FontWeight.ExtraBold,
-                color = MaterialTheme.colors.secondary,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            Text(
-                book.author,
-                fontSize = 13.sp,
-                color = MaterialTheme.colors.secondary,
-                maxLines = 2,
-                overflow = TextOverflow.Ellipsis,
-                modifier = Modifier
-                    .graphicsLayer {
-                        alpha = 0.60f
-                    }
-
-            )
+    Box(modifier = Modifier
+        .fillMaxWidth()
+        .wrapContentHeight()
+        .padding(8.dp)
+        .padding(horizontal = 8.dp)
+        .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(10.dp))
+        .clickable {
+            detailsViewModel.onEvent(DetailsEvent.PlayOrToggleSong(book))
+            detailsViewModel.showPlayerFullScreen = true
+            detailsViewModel.seekTo(book.progress.toFloat())
         }
+    ) {
+        Row(Modifier.fillMaxSize())
+        {
+            Image(
+                modifier = Modifier
+                    .size(120.dp)
+                    .padding(4.dp)
+                    .padding(bottom = 4.dp)
+                    .background(MaterialTheme.colors.primaryVariant)
+                    .clip(RoundedCornerShape(10.dp)),
+                painter = rememberAsyncImagePainter(model = File(book.cover)),
+                contentDescription = ""
+            )
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(8.dp),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.Start
+            ) {
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    book.name,
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    color = MaterialTheme.colors.secondary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                )
+
+                Text(
+                    book.author,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colors.secondary,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier
+                        .graphicsLayer {
+                            alpha = 0.60f
+                        }
+                )
+            }
+        }
+        if (book.progress>= 1000){
+            Column(
+                Modifier
+                    .height(132.dp)
+                    .clip(RoundedCornerShape(bottomEnd = 10.dp, bottomStart = 10.dp))
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.Bottom,
+                horizontalAlignment = Alignment.End
+            ) {
+                Text(
+                    text =
+                    if (book.duration == book.progress) "done"
+                    else "${
+                        (detailsViewModel.formatLong((book.duration - book.progress).toLong())).substring(
+                            0,
+                            5
+                        ).replace(":", "h")
+                    }m left",
+                    modifier = Modifier.padding(end = 16.dp, bottom = 4.dp)
+                )
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(4.dp)
+                        .drawBehind {
+                            drawRect(
+                                Blu,
+                                size = Size(
+                                    size.width * (book.progress / book.duration).toFloat(),
+                                    size.height
+                                )
+                            )
+                        }
+                )
+            }
+        }
+
+
     }
 }

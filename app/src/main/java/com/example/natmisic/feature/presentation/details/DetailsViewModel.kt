@@ -82,7 +82,6 @@ class DetailsViewModel @Inject constructor(
                         null
                     )
                 }
-
             }
             is DetailsEvent.Skip -> {
                 currentPlaybackPosition.let { currentPosition ->
@@ -222,8 +221,8 @@ class DetailsViewModel @Inject constructor(
         updateCurrentPlaybackPosition()
     }
 
-    private fun formatLong(value: Long): String {
-        val dateFormat = SimpleDateFormat("mm:ss", Locale.getDefault())
+    fun formatLong(value: Long): String {
+        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
         return dateFormat.format(value)
     }
 
@@ -286,6 +285,12 @@ class DetailsViewModel @Inject constructor(
             withContext(Dispatchers.Main) {
                 _state.value = state.value.copy(book = book)
             }
+        }
+    }
+
+    fun saveProgress(progress: Long, book: Book){
+        viewModelScope.launch (Dispatchers.IO){
+            useCases.updateBookById(book.copy(progress = progress.toInt()))
         }
     }
     // endregion
