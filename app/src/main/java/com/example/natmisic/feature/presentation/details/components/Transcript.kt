@@ -1,6 +1,7 @@
 package com.example.natmisic.feature.presentation.details.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -15,16 +16,20 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.natmisic.core.util.NoRippleInteractionSource
 import com.example.natmisic.feature.domain.model.Timestamp
+import com.example.natmisic.feature.presentation.details.DetailsEvent
+import com.example.natmisic.feature.presentation.details.DetailsViewModel
 
 @Composable
-fun TranscriptTab(timestamp: List<Timestamp?>) {
+fun TranscriptTab(timestamp: List<Timestamp?>, viewModel: DetailsViewModel) {
     Box(modifier = Modifier.fillMaxSize()) {
         // items
         LazyColumn(
             Modifier
                 .fillMaxSize()
-                .padding(horizontal = 60.dp), reverseLayout = true) {
+                .padding(horizontal = 60.dp), reverseLayout = true
+        ) {
             item {
                 Spacer(modifier = Modifier.size(200.dp))
             }
@@ -36,26 +41,47 @@ fun TranscriptTab(timestamp: List<Timestamp?>) {
                     fontWeight = FontWeight.Bold,
                     fontSize = 15.sp,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(vertical = 16.dp)
+                    modifier = Modifier
+                        .padding(vertical = 16.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = NoRippleInteractionSource()
+                        ) {
+                            viewModel.onEvent(DetailsEvent.ShowTimestampPopup(it))
+                        }
                 )
             }
             item {
                 Spacer(modifier = Modifier.size(200.dp))
             }
         }
-        Box(modifier = Modifier.fillMaxSize()){
+        Box(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
-                    .background(Brush.verticalGradient(listOf(MaterialTheme.colors.primary, Color.Transparent)))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                MaterialTheme.colors.primary,
+                                Color.Transparent
+                            )
+                        )
+                    )
                     .align(Alignment.TopCenter)
             )
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp)
-                    .background(Brush.verticalGradient(listOf(Color.Transparent, MaterialTheme.colors.primary)))
+                    .background(
+                        Brush.verticalGradient(
+                            listOf(
+                                Color.Transparent,
+                                MaterialTheme.colors.primary
+                            )
+                        )
+                    )
                     .align(Alignment.BottomCenter)
             )
         }

@@ -1,5 +1,7 @@
 package com.example.natmisic.feature.presentation.details.components
 
+import androidx.activity.OnBackPressedCallback
+import androidx.activity.OnBackPressedDispatcher
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -26,7 +28,10 @@ import com.example.natmisic.feature.presentation.details.DetailsEvent
 import com.example.natmisic.feature.presentation.details.DetailsViewModel
 
 @Composable
-fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
+fun MusicController(
+    viewmodel: DetailsViewModel = hiltViewModel(),
+    backPressedDispatcher: OnBackPressedDispatcher
+) {
     val state = viewmodel.state.value
     var sliderIsChanging by remember { mutableStateOf(false) }
     var localSliderValue by remember { mutableStateOf(0f) }
@@ -43,6 +48,28 @@ fun MusicController(viewmodel: DetailsViewModel = hiltViewModel()) {
     val book = state.book
     val context = LocalContext.current
     val playbackStateCompat by viewmodel.playbackState.observeAsState()
+
+
+    val backCallback = remember {
+        object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                viewmodel.showPlayerFullScreen = false
+            }
+        }
+    }
+
+    LaunchedEffect("playbackPosition") {
+        viewmodel.updateCurrentPlaybackPosition()
+    }
+
+    DisposableEffect(backPressedDispatcher) {
+        backPressedDispatcher.addCallback(backCallback)
+
+        onDispose {
+            backCallback.remove()
+            viewmodel.showPlayerFullScreen = false
+        }
+    }
 
 
     Column(

@@ -17,6 +17,7 @@ import com.example.musicplayer.exoplayer.*
 import com.example.natmisic.core.exoplayer.MusicService
 import com.example.natmisic.core.util.Constants
 import com.example.natmisic.core.util.Resource
+import com.example.natmisic.core.util.TAG
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.model.Timestamp
 import com.example.natmisic.feature.domain.use_case.UseCases
@@ -30,7 +31,9 @@ import javax.inject.Inject
 
 data class DetailsState(
     val book: Book? = null,
-    val prosessing: Boolean = false
+    val prosessing: Boolean = false,
+    val popup: Boolean = false,
+    val timestamp: Timestamp? = null
 )
 
 sealed class DetailsEvent {
@@ -44,6 +47,11 @@ sealed class DetailsEvent {
         val timestamp: String,
         val context: Context
     ) : DetailsEvent()
+
+    data class ShowTimestampPopup(val item: Timestamp) : DetailsEvent()
+    object ClosePopup : DetailsEvent()
+    data class DeleteTimestamp(val item: Timestamp) : DetailsEvent()
+    data class SaveTimestamp(val item: Timestamp, val txt: String) : DetailsEvent()
 }
 
 
@@ -101,13 +109,15 @@ class DetailsViewModel @Inject constructor(
                 val startTime = event.timestamp
                 val endTime = formatLong(event.timestamp.toTimeDateLong() + 10000)
 
-                Log.d(com.example.natmisic.core.util.TAG, "$startTime  $endTime")
+                Log.d(TAG, "$startTime  $endTime")
+
                 val input = File(book.path)
-                val output = File(context.cacheDir, "output${(0..99999).random()}.${input.extension}")
+                val output =
+                    File(context.cacheDir, "output${(0..99999).random()}.${input.extension}")
 
                 _state.value = state.value.copy(prosessing = true)
 
-                viewModelScope.launch (Dispatchers.Default){
+                viewModelScope.launch(Dispatchers.Default) {
                     val rc =
                         FFmpeg.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
                     when (rc) {
@@ -123,7 +133,8 @@ class DetailsViewModel @Inject constructor(
                             // TODO: use stt on output file
 
 
-                            val stt = "I've tried this but the speechRecognizer stops recognizing after the first listen or doesn't listen at all sometimes"
+                            val stt =
+                                "I've tried this but the speechRecognizer stops recognizing after the first listen or doesn't listen at all sometimes"
 
                             // ! save to db
                             val newBook = book.copy(
@@ -152,6 +163,41 @@ class DetailsViewModel @Inject constructor(
             }
             DetailsEvent.SkipToNextSong -> {}
             DetailsEvent.SkipToPreviousSong -> {}
+            is DetailsEvent.ShowTimestampPopup -> {
+                _state.value = state.value.copy(popup = true, timestamp = event.item)
+            }
+            is DetailsEvent.ClosePopup -> {
+                _state.value = state.value.copy(popup = false)
+            }
+            is DetailsEvent.DeleteTimestamp -> {
+                val list = state.value.book!!.timestamp.toMutableList()
+                list.remove(event.item)
+                val book = state.value.book!!.copy(timestamp = list.toList())
+                viewModelScope.launch(Dispatchers.IO) {
+                    useCases.updateBookById(book)
+                    withContext(Dispatchers.Main){
+                        _state.value = state.value.copy(book = book, popup = false)
+                    }
+                }
+            }
+            is DetailsEvent.SaveTimestamp -> {
+                val item = event.item
+                val newItem = item.copy(text = event.txt)
+
+                val list = state.value.book!!.timestamp.toMutableList()
+
+                list.remove(item)
+                list.add(newItem)
+
+                val book = state.value.book!!.copy(timestamp = list.toList())
+
+                viewModelScope.launch(Dispatchers.IO) {
+                    useCases.updateBookById(book)
+                    withContext(Dispatchers.Main){
+                        _state.value = state.value.copy(book = book, popup = false)
+                    }
+                }
+            }
         }
     }
 
@@ -229,6 +275,7 @@ class DetailsViewModel @Inject constructor(
         val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
         return dateFormat.format(value)
     }
+
     fun String.toTimeDateLong(): Long {
         val format = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
         return format.parse(this)?.time ?: throw IllegalArgumentException("Invalid time string")
@@ -296,8 +343,8 @@ class DetailsViewModel @Inject constructor(
         }
     }
 
-    fun saveProgress(progress: Long, book: Book){
-        viewModelScope.launch (Dispatchers.IO){
+    fun saveProgress(progress: Long, book: Book) {
+        viewModelScope.launch(Dispatchers.IO) {
             useCases.updateBookById(book.copy(progress = progress.toInt()))
         }
     }

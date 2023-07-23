@@ -76,11 +76,20 @@ fun HomeScreen(
     ) {
         Column(Modifier.fillMaxSize()) {
             TopBar(navController = navController)
-            LazyColumn(Modifier.fillMaxSize().alpha(if (state.loading) 0f else 1f)) {
-                item { 
-                    Text(text = "Library", fontSize = 20.sp, fontWeight = FontWeight.Medium, modifier = Modifier.padding(16.dp))
+            LazyColumn(
+                Modifier
+                    .fillMaxSize()
+                    .alpha(if (state.loading) 0f else 1f)
+            ) {
+                item {
+                    Text(
+                        text = "Library",
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Medium,
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
-                items(state.books.sortedBy { it.progress/it.duration }.reversed()) { book ->
+                items(state.books.sortedBy { it.progress / it.duration }.reversed()) { book ->
                     BookItem(book, detailsViewModel)
                 }
                 item {
@@ -145,9 +154,10 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
         .padding(8.dp)
         .padding(horizontal = 8.dp)
         .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(10.dp))
+        .clip(RoundedCornerShape(10.dp))
         .clickable {
             detailsViewModel.onEvent(DetailsEvent.PlayOrToggleSong(book))
-            if (detailsViewModel.state.value.book?.id != book.id){
+            if (detailsViewModel.state.value.book?.id != book.id) {
                 detailsViewModel.seekTo(book.progress.toFloat())
             }
             detailsViewModel.showPlayerFullScreen = true
@@ -195,7 +205,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                 )
             }
         }
-        if (book.progress>= 1000){
+        if (book.progress >= 1000 * 60 * 10) {
             Column(
                 Modifier
                     .height(132.dp)
@@ -206,7 +216,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
             ) {
                 Text(
                     text =
-                    if (book.duration - book.progress < 1000) "done"
+                    if (book.duration - book.progress < 1000 * 60 * 10) "done"
                     else "${
                         (detailsViewModel.formatLong((book.duration - book.progress).toLong())).substring(
                             0,
@@ -223,7 +233,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                         .height(4.dp)
                         .drawBehind {
                             drawRect(
-                                if(book.duration - book.progress < 1000) Grn else Blu,
+                                if (book.duration - book.progress < 1000 * 60 * 10) Grn else Blu,
                                 size = Size(
                                     size.width * (book.progress.toFloat() / book.duration.toFloat()),
                                     size.height

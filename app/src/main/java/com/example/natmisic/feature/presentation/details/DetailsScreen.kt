@@ -1,10 +1,7 @@
 package com.example.natmisic.feature.presentation.details
 
-import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
@@ -13,9 +10,7 @@ import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -28,6 +23,7 @@ import com.example.natmisic.R
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.presentation.details.components.CoverTab
 import com.example.natmisic.feature.presentation.details.components.MusicController
+import com.example.natmisic.feature.presentation.details.components.TranscriptPopUp
 import com.example.natmisic.feature.presentation.details.components.TranscriptTab
 
 
@@ -37,28 +33,6 @@ fun DetailsScreen(
     backPressedDispatcher: OnBackPressedDispatcher,
     viewmodel: DetailsViewModel = hiltViewModel()
 ) {
-    val backCallback = remember {
-        object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                viewmodel.showPlayerFullScreen = false
-            }
-        }
-    }
-
-    LaunchedEffect("playbackPosition") {
-        viewmodel.updateCurrentPlaybackPosition()
-    }
-
-    DisposableEffect(backPressedDispatcher) {
-        backPressedDispatcher.addCallback(backCallback)
-
-        onDispose {
-            backCallback.remove()
-            viewmodel.showPlayerFullScreen = false
-        }
-    }
-
-
     val state = viewmodel.state.value
     val book = state.book
     AnimatedVisibility(
@@ -72,9 +46,20 @@ fun DetailsScreen(
         if (book != null) {
             DetailsBody(
                 book = book,
-                viewmodel = viewmodel
+                viewmodel = viewmodel,
+                backPressedDispatcher
             )
         }
+    }
+    AnimatedVisibility(
+        visible = state.timestamp != null && state.popup,
+        enter = fadeIn(),
+        exit = fadeOut()
+    ) {
+        TranscriptPopUp(
+            item = state.timestamp!!,
+            viewmodel = viewmodel,
+        )
     }
 }
 
@@ -82,7 +67,7 @@ fun DetailsScreen(
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalFoundationApi::class)
 @Composable
-fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
+fun DetailsBody(book: Book, viewmodel: DetailsViewModel, backPressedDispatcher: OnBackPressedDispatcher) {
 
     val swipeableState = rememberSwipeableState(initialValue = 0)
     val endAnchor = LocalConfiguration.current.screenHeightDp * LocalDensity.current.density
@@ -150,11 +135,11 @@ fun DetailsBody(book: Book, viewmodel: DetailsViewModel) {
             ) { tabIndex ->
                 when (tabIndex) {
                     0 -> CoverTab(book.cover)
-                    1 -> TranscriptTab(book.timestamp)
+                    1 -> TranscriptTab(book.timestamp, viewmodel)
                 }
             }
             Box(Modifier.weight(1.5f)) {
-                MusicController()
+                MusicController(backPressedDispatcher = backPressedDispatcher)
             }
         }
     }
