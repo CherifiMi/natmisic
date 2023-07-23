@@ -12,8 +12,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import coil.compose.rememberAsyncImagePainter
+import com.example.natmisic.R
 import java.io.File
 
 @Composable
@@ -25,7 +27,7 @@ fun CoverTab(cover: String) {
                 .aspectRatio(1f)
                 .background(MaterialTheme.colors.primary, RoundedCornerShape(10))
                 .clip(RoundedCornerShape(10)),
-            painter = rememberAsyncImagePainter(model = File(cover)),
+            painter = if (cover != "") rememberAsyncImagePainter(model = File(cover)) else painterResource(R.drawable.defult_cover),
             contentDescription = "",
         )
     }

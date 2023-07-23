@@ -24,6 +24,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -138,7 +139,7 @@ fun DetailsBottomBarItem(
                     .aspectRatio(1f)
                     .background(MaterialTheme.colors.primary, RoundedCornerShape(100))
                     .clip(RoundedCornerShape(100)),
-                painter = rememberAsyncImagePainter(model = File(book.cover)),
+                painter = if(book.cover != "")  rememberAsyncImagePainter(model = File(book.cover)) else painterResource(R.drawable.defult_cover),
                 contentDescription = "",
             )
             Column(

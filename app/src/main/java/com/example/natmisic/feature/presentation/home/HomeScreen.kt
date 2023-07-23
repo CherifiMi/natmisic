@@ -172,7 +172,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                     .padding(bottom = 4.dp)
                     .background(MaterialTheme.colors.primaryVariant)
                     .clip(RoundedCornerShape(10.dp)),
-                painter = rememberAsyncImagePainter(model = File(book.cover)),
+                painter = if(book.cover != "")rememberAsyncImagePainter(model = File(book.cover)) else painterResource(R.drawable.defult_cover),
                 contentDescription = ""
             )
             Column(
