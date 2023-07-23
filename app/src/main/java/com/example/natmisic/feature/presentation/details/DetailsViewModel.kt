@@ -175,7 +175,7 @@ class DetailsViewModel @Inject constructor(
                 val book = state.value.book!!.copy(timestamp = list.toList())
                 viewModelScope.launch(Dispatchers.IO) {
                     useCases.updateBookById(book)
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         _state.value = state.value.copy(book = book, popup = false)
                     }
                 }
@@ -193,7 +193,7 @@ class DetailsViewModel @Inject constructor(
 
                 viewModelScope.launch(Dispatchers.IO) {
                     useCases.updateBookById(book)
-                    withContext(Dispatchers.Main){
+                    withContext(Dispatchers.Main) {
                         _state.value = state.value.copy(book = book, popup = false)
                     }
                 }
