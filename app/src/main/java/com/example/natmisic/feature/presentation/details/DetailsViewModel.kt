@@ -23,7 +23,12 @@ import com.example.natmisic.feature.domain.model.Timestamp
 import com.example.natmisic.feature.domain.use_case.UseCases
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
+import org.json.JSONObject
+import org.vosk.Model
+import org.vosk.Recognizer
+import org.vosk.android.StorageService
 import java.io.File
+import java.io.InputStream
 import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
@@ -107,47 +112,45 @@ class DetailsViewModel @Inject constructor(
                 val book = event.book
                 val context = event.context
                 val startTime = event.timestamp
-                val endTime = formatLong(event.timestamp.toTimeDateLong() + 10000)
+                val endTime = formatLong(event.timestamp.toTimeDateLong() + 1000 * 10) //10s
 
                 Log.d(TAG, "$startTime  $endTime")
 
                 val input = File(book.path)
-                val output =
-                    File(context.cacheDir, "output${(0..99999).random()}.${input.extension}")
+
+                val outname = "output${(0..99999).random()}"
+                val output = File(context.cacheDir, "$outname.${input.extension}")
+                val voskfile = File(context.cacheDir, "$outname.wav")
 
                 _state.value = state.value.copy(prosessing = true)
 
                 viewModelScope.launch(Dispatchers.Default) {
-                    val rc =
-                        FFmpeg.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
-                    when (rc) {
+                    val slice10s = FFmpeg.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
+                    when (slice10s) {
                         RETURN_CODE_SUCCESS -> {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    "Note saved at $startTime",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                            val formatFile = FFmpeg.execute("-i '${output.path}' -ar 16000 -ac 1 -f s16le ${voskfile.path}")
+
+                            if (formatFile == RETURN_CODE_SUCCESS){
+                                recognizeFile(voskfile.inputStream(), event.context){
+                                    val newBook = book.copy(
+                                        timestamp = book.timestamp + Timestamp(
+                                            id = book.id!!,
+                                            it,
+                                            startTime
+                                        )
+                                    )
+                                    viewModelScope.launch{
+                                        useCases.updateBookById(newBook)
+                                    }
+                                    _state.value = state.value.copy(book = newBook)
+                                    Toast.makeText(
+                                        context,
+                                        "$startTime: $it",
+                                        Toast.LENGTH_SHORT
+                                    ).show()
+                                }
                             }
 
-                            // TODO: use stt on output file
-
-
-                            val stt =
-                                "I've tried this but the speechRecognizer stops recognizing after the first listen or doesn't listen at all sometimes"
-
-                            // ! save to db
-                            val newBook = book.copy(
-                                timestamp = book.timestamp + Timestamp(
-                                    id = book.id!!,
-                                    stt,
-                                    startTime
-                                )
-                            )
-                            useCases.updateBookById(newBook)
-                            updateCurrentBookState(newBook.id!!)
-
-                            output.delete()
                             _state.value = state.value.copy(prosessing = false)
                         }
                         else -> {
@@ -155,14 +158,18 @@ class DetailsViewModel @Inject constructor(
                                 Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT)
                                     .show()
                             }
-                            output.delete()
                             _state.value = state.value.copy(prosessing = false)
                         }
                     }
+
+                    output.delete()
+                    voskfile.delete()
                 }
+
+
             }
-            DetailsEvent.SkipToNextSong -> {}
-            DetailsEvent.SkipToPreviousSong -> {}
+            is DetailsEvent.SkipToNextSong -> {}
+            is DetailsEvent.SkipToPreviousSong -> {}
             is DetailsEvent.ShowTimestampPopup -> {
                 _state.value = state.value.copy(popup = true, timestamp = event.item)
             }
@@ -201,6 +208,24 @@ class DetailsViewModel @Inject constructor(
         }
     }
 
+    fun recognizeFile(ais: InputStream, context: Context, spt:(text: String) -> Unit) {
+        StorageService.unpack(
+            context,
+            "model-en-us",
+            "model",
+            { model: Model? ->
+                Recognizer(model, 16000f).use { recognizer ->
+                    var nbytes: Int
+                    val b = ByteArray(4096)
+                    while (ais.read(b).also { nbytes = it } >= 0) {
+                        recognizer.acceptWaveForm(b, nbytes)
+                    }
+                    val stt = JSONObject(recognizer.finalResult).getString("text")
+                    spt(stt)
+                }
+            }
+        ) {}
+    }
 
     // region exoplyer
     var currentPlaybackPosition by mutableStateOf(0L)
@@ -278,7 +303,8 @@ class DetailsViewModel @Inject constructor(
 
     fun String.toTimeDateLong(): Long {
         val format = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-        return format.parse(this)?.time ?: throw IllegalArgumentException("Invalid time string")
+        return format.parse(this)?.time
+            ?: throw IllegalArgumentException("Invalid time string")
     }
 
     fun skipToNextSong() {

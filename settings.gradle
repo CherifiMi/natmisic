@@ -19,4 +19,4 @@ dependencyResolutionManagement {
     }
 }
 rootProject.name = "Nat Misic"
-include ':app'
+include ':app', ':models'

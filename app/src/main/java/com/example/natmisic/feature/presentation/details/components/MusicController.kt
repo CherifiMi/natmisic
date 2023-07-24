@@ -83,20 +83,16 @@ fun MusicController(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text(
-                    viewmodel.currentPlaybackFormattedPosition,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 11.sp
-                )
-            }
-            CompositionLocalProvider(LocalContentAlpha provides ContentAlpha.medium) {
-                Text(
-                    viewmodel.currentSongFormattedPosition,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 11.sp
-                )
-            }
+            Text(
+                viewmodel.currentPlaybackFormattedPosition,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp
+            )
+            Text(
+                viewmodel.currentSongFormattedPosition,
+                fontWeight = FontWeight.SemiBold,
+                fontSize = 11.sp
+            )
         }
         Slider(
             value = sliderProgress,
