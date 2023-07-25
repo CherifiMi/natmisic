@@ -122,7 +122,6 @@ class DetailsViewModel @Inject constructor(
 
                 viewModelScope.launch(Dispatchers.Default) {
                     val slice10s = FFmpegKit.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
-                    "-i '${input.path}' -acodec copy -vcodec copy -copyts -ss 5 foominus5.ogg"
 
                     if (ReturnCode.isSuccess(slice10s.returnCode)) {
 
