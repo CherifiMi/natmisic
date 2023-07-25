@@ -286,6 +286,8 @@ class DetailsViewModel @Inject constructor(
         ) {}
     }
 
+    //endregion
+
     // region exoplyer
     var currentPlaybackPosition by mutableStateOf(0L)
 
