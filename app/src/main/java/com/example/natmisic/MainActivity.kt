@@ -1,6 +1,5 @@
 package com.example.natmisic
 
-import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.provider.DocumentsContract.*
@@ -12,11 +11,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.ui.Modifier
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.example.natmisic.core.util.runTimePermission
 import com.example.natmisic.feature.presentation.folder_picker.FolderPickerScreen
 import com.example.natmisic.feature.presentation.home.HomeScreen
 import com.example.natmisic.feature.presentation.settings.SettingsScreen
@@ -33,10 +31,10 @@ class MainActivity : ComponentActivity() {
     @RequiresApi(Build.VERSION_CODES.O)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        runTimePermission()
-
         setContent {
+
+            runTimePermission()
+
             NatMisicTheme {
                 Surface(
                     modifier = Modifier.fillMaxSize(),
@@ -67,26 +65,4 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
-    fun runTimePermission(){
-        if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED)
-        {
-            ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.WRITE_EXTERNAL_STORAGE), 1)
-        }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_IMAGES) != PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_MEDIA_IMAGES), 1)
-            }
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_VIDEO) != PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_MEDIA_VIDEO), 1)
-            }
-            if (ContextCompat.checkSelfPermission(this, android.Manifest.permission.READ_MEDIA_AUDIO) != PackageManager.PERMISSION_GRANTED)
-            {
-                ActivityCompat.requestPermissions(this, arrayOf(android.Manifest.permission.READ_MEDIA_AUDIO), 1)
-            }
-        }
-    }
 }
-

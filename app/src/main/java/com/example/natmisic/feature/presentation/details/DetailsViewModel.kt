@@ -3,7 +3,6 @@ package com.example.natmisic.feature.presentation.details
 import android.content.Context
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
-import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -17,7 +16,6 @@ import com.example.musicplayer.exoplayer.*
 import com.example.natmisic.core.exoplayer.MusicService
 import com.example.natmisic.core.util.Constants
 import com.example.natmisic.core.util.Resource
-import com.example.natmisic.core.util.TAG
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.model.Timestamp
 import com.example.natmisic.feature.domain.use_case.UseCases
@@ -114,8 +112,6 @@ class DetailsViewModel @Inject constructor(
                 val startTime = event.timestamp
                 val endTime = formatLong(event.timestamp.toTimeDateLong() + 1000 * 10) //10s
 
-                Log.d(TAG, "$startTime  $endTime")
-
                 val input = File(book.path)
 
                 val outname = "output${(0..99999).random()}"
@@ -165,8 +161,6 @@ class DetailsViewModel @Inject constructor(
                     output.delete()
                     voskfile.delete()
                 }
-
-
             }
             is DetailsEvent.SkipToNextSong -> {}
             is DetailsEvent.SkipToPreviousSong -> {}
@@ -207,6 +201,70 @@ class DetailsViewModel @Inject constructor(
             }
         }
     }
+
+
+    suspend fun updateCurrentPlaybackPosition() {
+        val currentPosition = playbackState.value?.currentPlaybackPosition
+        if (currentPosition != null && currentPosition != currentPlaybackPosition) {
+            currentPlaybackPosition = currentPosition
+        }
+        delay(Constants.UPDATE_PLAYER_POSITION_INTERVAL)
+        updateCurrentPlaybackPosition()
+    }
+
+    fun formatLong(value: Long): String {
+        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        return dateFormat.format(value)
+    }
+
+    fun String.toTimeDateLong(): Long {
+        val format = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
+        return format.parse(this)?.time
+            ?: throw IllegalArgumentException("Invalid time string")
+    }
+
+    fun skipToNextSong() {
+        musicServiceConnection.transportController.skipToNext()
+    }
+
+    fun skipToPreviousSong() {
+        musicServiceConnection.transportController.skipToPrevious()
+    }
+
+    fun seekTo(pos: Float) {
+        musicServiceConnection.transportController.seekTo(pos.toLong())
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        musicServiceConnection.unsubscribe(
+            Constants.MEDIA_ROOT_ID,
+            object : MediaBrowserCompat.SubscriptionCallback() {})
+    }
+
+    fun toBook(currentSong: MediaMetadataCompat): Book? {
+        return currentSong.description.let {
+            runBlocking(Dispatchers.IO) {
+                useCases.getBookById(it.mediaId!!.toInt())
+            }
+        }
+    }
+
+    fun updateCurrentBookState(id: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val book = useCases.getBookById(id)
+            withContext(Dispatchers.Main) {
+                _state.value = state.value.copy(book = book)
+            }
+        }
+    }
+
+    fun saveProgress(progress: Long, book: Book) {
+        viewModelScope.launch(Dispatchers.IO) {
+            useCases.updateBookById(book.copy(progress = progress.toInt()))
+        }
+    }
+
 
     fun recognizeFile(ais: InputStream, context: Context, spt:(text: String) -> Unit) {
         StorageService.unpack(
@@ -285,94 +343,6 @@ class DetailsViewModel @Inject constructor(
                 }
             }
         )
-    }
-
-    suspend fun updateCurrentPlaybackPosition() {
-        val currentPosition = playbackState.value?.currentPlaybackPosition
-        if (currentPosition != null && currentPosition != currentPlaybackPosition) {
-            currentPlaybackPosition = currentPosition
-        }
-        delay(Constants.UPDATE_PLAYER_POSITION_INTERVAL)
-        updateCurrentPlaybackPosition()
-    }
-
-    fun formatLong(value: Long): String {
-        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-        return dateFormat.format(value)
-    }
-
-    fun String.toTimeDateLong(): Long {
-        val format = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-        return format.parse(this)?.time
-            ?: throw IllegalArgumentException("Invalid time string")
-    }
-
-    fun skipToNextSong() {
-        musicServiceConnection.transportController.skipToNext()
-    }
-
-    fun skipToPreviousSong() {
-        musicServiceConnection.transportController.skipToPrevious()
-    }
-
-    fun seekTo(pos: Float) {
-        musicServiceConnection.transportController.seekTo(pos.toLong())
-    }
-
-    fun playOrToggleSong(mediaItem: Book, toggle: Boolean = false) {
-        updateCurrentBookState(mediaItem.id!!)
-        val isPrepared = playbackState.value?.isPrepared ?: false
-        if (isPrepared && mediaItem.id.toString() ==
-            currentPlayingSong.value?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
-//            curPlayingSong.value?.getString(METADATA_KEY_MEDIA_ID)
-        ) {
-            playbackState.value?.let { playbackState ->
-                when {
-                    playbackState.isPlaying -> {
-                        if (toggle) musicServiceConnection.transportController.pause()
-                    }
-                    playbackState.isPlayEnabled -> {
-                        musicServiceConnection.transportController.play()
-                    }
-                    else -> Unit
-                }
-            }
-        } else {
-            musicServiceConnection.transportController.playFromMediaId(
-                mediaItem.id.toString(),
-                null
-            )
-        }
-    }
-
-    override fun onCleared() {
-        super.onCleared()
-        musicServiceConnection.unsubscribe(
-            Constants.MEDIA_ROOT_ID,
-            object : MediaBrowserCompat.SubscriptionCallback() {})
-    }
-
-    fun toBook(currentSong: MediaMetadataCompat): Book? {
-        return currentSong.description.let {
-            runBlocking(Dispatchers.IO) {
-                useCases.getBookById(it.mediaId!!.toInt())
-            }
-        }
-    }
-
-    fun updateCurrentBookState(id: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val book = useCases.getBookById(id)
-            withContext(Dispatchers.Main) {
-                _state.value = state.value.copy(book = book)
-            }
-        }
-    }
-
-    fun saveProgress(progress: Long, book: Book) {
-        viewModelScope.launch(Dispatchers.IO) {
-            useCases.updateBookById(book.copy(progress = progress.toInt()))
-        }
     }
     // endregion
 }
