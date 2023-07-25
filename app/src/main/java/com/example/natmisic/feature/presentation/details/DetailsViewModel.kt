@@ -145,13 +145,18 @@ class DetailsViewModel @Inject constructor(
                                         Toast.LENGTH_SHORT
                                     ).show()
                                 }
+                            }else{
+                                withContext(Dispatchers.Main) {
+                                    Toast.makeText(context, "speech to text went wrong", Toast.LENGTH_SHORT)
+                                        .show()
+                                }
                             }
 
                             _state.value = state.value.copy(prosessing = false)
                         }
                         else -> {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "something went wrong", Toast.LENGTH_SHORT)
+                                Toast.makeText(context, "cutting file went wrong", Toast.LENGTH_SHORT)
                                     .show()
                             }
                             _state.value = state.value.copy(prosessing = false)
