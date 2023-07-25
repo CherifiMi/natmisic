@@ -10,8 +10,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS
-import com.arthenica.mobileffmpeg.FFmpeg
+import com.arthenica.ffmpegkit.FFmpegKit
+import com.arthenica.ffmpegkit.ReturnCode
 import com.example.musicplayer.exoplayer.*
 import com.example.natmisic.core.exoplayer.MusicService
 import com.example.natmisic.core.util.Constants
@@ -121,48 +121,51 @@ class DetailsViewModel @Inject constructor(
                 _state.value = state.value.copy(prosessing = true)
 
                 viewModelScope.launch(Dispatchers.Default) {
-                    val slice10s = FFmpeg.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
-                    when (slice10s) {
-                        RETURN_CODE_SUCCESS -> {
-                            val formatFile = FFmpeg.execute("-i '${output.path}' -ar 16000 -ac 1 -f s16le ${voskfile.path}")
+                    val slice10s = FFmpegKit.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
+                    "-i '${input.path}' -acodec copy -vcodec copy -copyts -ss 5 foominus5.ogg"
 
-                            if (formatFile == RETURN_CODE_SUCCESS){
-                                recognizeFile(voskfile.inputStream(), event.context){
-                                    val newBook = book.copy(
-                                        timestamp = book.timestamp + Timestamp(
-                                            id = book.id!!,
-                                            it,
-                                            startTime
-                                        )
+                    if (ReturnCode.isSuccess(slice10s.returnCode)) {
+
+                        val formatFile =
+                            FFmpegKit.execute("-i '${output.path}' -ar 16000 -ac 1 -f s16le ${voskfile.path}")
+
+                        if (ReturnCode.isSuccess(formatFile.returnCode)) {
+                            recognizeFile(voskfile.inputStream(), event.context) {
+                                val newBook = book.copy(
+                                    timestamp = book.timestamp + Timestamp(
+                                        id = book.id!!,
+                                        it,
+                                        startTime
                                     )
-                                    viewModelScope.launch{
-                                        useCases.updateBookById(newBook)
-                                    }
-                                    _state.value = state.value.copy(book = newBook)
-                                    Toast.makeText(
-                                        context,
-                                        "$startTime: $it",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
+                                )
+                                viewModelScope.launch {
+                                    useCases.updateBookById(newBook)
                                 }
-                            }else{
-                                withContext(Dispatchers.Main) {
-                                    Toast.makeText(context, "speech to text went wrong", Toast.LENGTH_SHORT)
-                                        .show()
-                                }
+                                _state.value = state.value.copy(book = newBook)
+                                Toast.makeText(
+                                    context,
+                                    "$startTime: $it",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
-
-                            _state.value = state.value.copy(prosessing = false)
-                        }
-                        else -> {
+                        } else {
                             withContext(Dispatchers.Main) {
-                                Toast.makeText(context, "cutting file went wrong", Toast.LENGTH_SHORT)
-                                    .show()
+                                Toast.makeText(
+                                    context,
+                                    "speech to text went wrong",
+                                    Toast.LENGTH_SHORT
+                                ).show()
                             }
-                            _state.value = state.value.copy(prosessing = false)
                         }
-                    }
 
+                        _state.value = state.value.copy(prosessing = false)
+                    } else {
+                        withContext(Dispatchers.Main) {
+                            Toast.makeText(context, "cutting file went wrong", Toast.LENGTH_SHORT)
+                                .show()
+                        }
+                        _state.value = state.value.copy(prosessing = false)
+                    }
                     output.delete()
                     voskfile.delete()
                 }
@@ -272,7 +275,7 @@ class DetailsViewModel @Inject constructor(
     }
 
 
-    fun recognizeFile(ais: InputStream, context: Context, spt:(text: String) -> Unit) {
+    fun recognizeFile(ais: InputStream, context: Context, spt: (text: String) -> Unit) {
         StorageService.unpack(
             context,
             "model-en-us",

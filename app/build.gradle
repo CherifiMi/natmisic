@@ -113,7 +113,7 @@ dependencies {
     implementation "com.google.accompanist:accompanist-pager-indicators:0.30.1"
 
     // ffmpeg
-    implementation 'com.arthenica:mobile-ffmpeg-full:4.4'
+    implementation 'com.arthenica:ffmpeg-kit-full:5.1'
 
     // lottie
     implementation "com.airbnb.android:lottie-compose:6.1.0"
