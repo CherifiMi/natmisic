@@ -203,6 +203,7 @@ class DetailsViewModel @Inject constructor(
     }
 
 
+    //region ext
     suspend fun updateCurrentPlaybackPosition() {
         val currentPosition = playbackState.value?.currentPlaybackPosition
         if (currentPosition != null && currentPosition != currentPlaybackPosition) {
