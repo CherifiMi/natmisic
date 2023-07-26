@@ -27,9 +27,10 @@ import org.vosk.Recognizer
 import org.vosk.android.StorageService
 import java.io.File
 import java.io.InputStream
-import java.text.SimpleDateFormat
 import java.util.*
 import javax.inject.Inject
+import kotlin.time.Duration.Companion.milliseconds
+import kotlin.time.ExperimentalTime
 
 
 data class DetailsState(
@@ -109,51 +110,40 @@ class DetailsViewModel @Inject constructor(
             is DetailsEvent.RecordAndSaveTranscript -> {
                 val book = event.book
                 val context = event.context
-                val startTime = event.timestamp
-                val endTime = formatLong(event.timestamp.toTimeDateLong() + 1000 * 10) //10s
+
+                //val startTime = event.timestamp
+                //val endTime = formatLong(event.timestamp.toTimeDateLong() + 1000 * 10)
 
                 val input = File(book.path)
+                val output = File(context.cacheDir, "output${(0..999).random()}.wav")
 
-                val outname = "output${(0..99999).random()}"
-                val output = File(context.cacheDir, "$outname.${input.extension}")
-                val voskfile = File(context.cacheDir, "$outname.wav")
+                val startTime = event.timestamp.toTimeDateLong() / 1000
+                val endTime = startTime + 10
+
 
                 _state.value = state.value.copy(prosessing = true)
 
-                viewModelScope.launch(Dispatchers.Default) {
-                    val slice10s = FFmpegKit.execute("-i '${input.path}' -ss $startTime -to $endTime -c copy ${output.path}")
+                viewModelScope.launch(Dispatchers.IO) {
 
-                    if (ReturnCode.isSuccess(slice10s.returnCode)) {
+                    val sliceAndConvert = FFmpegKit.execute("-i '${input.path}' -ss $startTime -to $endTime -c pcm_s16le -ac 1 -ar 16000 ${output.path}")
 
-                        val formatFile =
-                            FFmpegKit.execute("-i '${output.path}' -ar 16000 -ac 1 -f s16le ${voskfile.path}")
-
-                        if (ReturnCode.isSuccess(formatFile.returnCode)) {
-                            recognizeFile(voskfile.inputStream(), event.context) {
-                                val newBook = book.copy(
-                                    timestamp = book.timestamp + Timestamp(
-                                        id = book.id!!,
-                                        it,
-                                        startTime
-                                    )
+                    if (ReturnCode.isSuccess(sliceAndConvert.returnCode)) {
+                        recognizeFile(output.inputStream(), event.context) {
+                            val newBook = book.copy(
+                                timestamp = book.timestamp + Timestamp(
+                                    id = book.id!!,
+                                    it,
+                                    formatLong(startTime*1000)
                                 )
-                                viewModelScope.launch {
-                                    useCases.updateBookById(newBook)
-                                }
-                                _state.value = state.value.copy(book = newBook)
-                                Toast.makeText(
-                                    context,
-                                    "$startTime: $it",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        } else {
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(
-                                    context,
-                                    "speech to text went wrong",
-                                    Toast.LENGTH_SHORT
-                                ).show()
+                            )
+                            _state.value = state.value.copy(book = newBook)
+                            Toast.makeText(
+                                context,
+                                "$startTime: $it",
+                                Toast.LENGTH_SHORT
+                            ).show()
+                            viewModelScope.launch(Dispatchers.IO){
+                                useCases.updateBookById(newBook)
                             }
                         }
 
@@ -166,7 +156,6 @@ class DetailsViewModel @Inject constructor(
                         _state.value = state.value.copy(prosessing = false)
                     }
                     output.delete()
-                    voskfile.delete()
                 }
             }
             is DetailsEvent.SkipToNextSong -> {}
@@ -220,15 +209,25 @@ class DetailsViewModel @Inject constructor(
         updateCurrentPlaybackPosition()
     }
 
+    @OptIn(ExperimentalTime::class)
     fun formatLong(value: Long): String {
-        val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-        return dateFormat.format(value)
+        //val dateFormat = SimpleDateFormat("HH:mm:ss", Locale.ENGLISH)
+
+        val seconds = value.milliseconds.inWholeSeconds
+        val HH: Long = seconds / 3600
+        val MM: Long = seconds % 3600 / 60
+        val SS: Long = seconds % 60
+
+
+        return String.format("%02d:%02d:%02d", HH, MM, SS)
     }
 
     fun String.toTimeDateLong(): Long {
-        val format = SimpleDateFormat("HH:mm:ss", Locale.getDefault())
-        return format.parse(this)?.time
-            ?: throw IllegalArgumentException("Invalid time string")
+        val HH = this.slice((0..1)).toLong()
+        val mm = this.slice((3..4)).toLong()
+        val ss = this.slice((6..7)).toLong()
+
+        return  (HH*3600 + mm*60 + ss) * 1000
     }
 
     fun skipToNextSong() {
