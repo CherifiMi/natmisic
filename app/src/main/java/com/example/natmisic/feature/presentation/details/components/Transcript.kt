@@ -35,7 +35,7 @@ fun TranscriptTab(timestamp: List<Timestamp?>, viewModel: DetailsViewModel) {
             item {
                 Spacer(modifier = Modifier.size(200.dp))
             }
-            items(timestamp) {
+            items(timestamp.reversed()) {
                 Text(
                     lineHeight = 20.sp,
                     text = it!!.text,
