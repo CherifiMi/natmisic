@@ -93,11 +93,13 @@ fun DetailsBottomBar(
                     .background(Brush.verticalGradient(colorStops = colorStops)),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                DetailsBottomBarItem(
-                    book = viewmodel.toBook(currentSong)!!,
-                    playbackStateCompat = playbackStateCompat,
-                    detailsViewModel = viewmodel,
-                )
+                viewmodel.toBook(currentSong)?.let {
+                    DetailsBottomBarItem(
+                        book = it,
+                        playbackStateCompat = playbackStateCompat,
+                        detailsViewModel = viewmodel,
+                    )
+                }
             }
         }
     }

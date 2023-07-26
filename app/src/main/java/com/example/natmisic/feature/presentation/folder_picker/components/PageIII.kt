@@ -1,6 +1,9 @@
 package com.example.natmisic.feature.presentation.folder_picker.components
 
 import android.content.Intent
+import android.content.Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
+import android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
@@ -13,6 +16,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -29,12 +33,18 @@ fun PageIII(
     navController: NavHostController,
     viewModel: FolderPickerViewModel
 ) {
+    val context = LocalContext.current
     // open folder picker and save root path
     val intent = Intent(Intent.ACTION_OPEN_DOCUMENT_TREE)
+
+    intent.addFlags(FLAG_GRANT_READ_URI_PERMISSION)
+    intent.addFlags(FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+
     val activityResultLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         result.data?.also { uri ->
+            context.contentResolver.takePersistableUriPermission(Uri.parse(uri.dataString), FLAG_GRANT_READ_URI_PERMISSION)
             viewModel.saveRootFolderName(uri.dataString.toString())
             navController.navigate(Screens.HOME.name)
         }
@@ -58,7 +68,8 @@ fun PageIII(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(vertical = 24.dp, horizontal = 100.dp)
         )
-        /*Text(
+
+        Text(
             text = stringResource(id = R.string.lorem),
             color = MaterialTheme.colors.secondary,
             fontSize = 16.sp,
@@ -66,7 +77,7 @@ fun PageIII(
             textAlign = TextAlign.Center,
             modifier = Modifier.padding(horizontal = 70.dp).padding(bottom = 48.dp),
             maxLines = 2
-        )*/
+        )
 
         Button(onClick = { activityResultLauncher.launch(intent) }, shape = RoundedCornerShape(40), border = BorderStroke(2.dp, MaterialTheme.colors.secondary))
         {

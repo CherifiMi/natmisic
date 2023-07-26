@@ -37,7 +37,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
         .padding(horizontal = 8.dp)
         .background(MaterialTheme.colors.primaryVariant, RoundedCornerShape(10.dp))
         .clip(RoundedCornerShape(10.dp))
-        .clickable {
+        .clickable(enabled = !detailsViewModel.showPlayerFullScreen){
             detailsViewModel.onEvent(DetailsEvent.PlayOrToggleSong(book))
             if (detailsViewModel.state.value.book?.id != book.id) {
                 detailsViewModel.seekTo(book.progress.toFloat())
@@ -88,7 +88,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                 )
             }
         }
-        if (book.progress >= 1000 * 60 * 10) {
+        if (book.progress >= 1000 * 60 * 1) {
             Column(
                 Modifier
                     .height(132.dp)
@@ -99,7 +99,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
             ) {
                 Text(
                     text =
-                    if (book.duration - book.progress < 1000 * 60 * 10) "done"
+                    if (book.duration - book.progress < 1000 * 60 * 1) "done"
                     else "${
                         (detailsViewModel.formatLong((book.duration - book.progress).toLong())).substring(
                             0,
@@ -116,7 +116,7 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                         .height(4.dp)
                         .drawBehind {
                             drawRect(
-                                if (book.duration - book.progress < 1000 * 60 * 10) Grn else Blu,
+                                if (book.duration - book.progress < 1000 * 60 * 1) Grn else Blu,
                                 size = Size(
                                     size.width * (book.progress.toFloat() / book.duration.toFloat()),
                                     size.height
@@ -126,7 +126,5 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                 )
             }
         }
-
-
     }
 }

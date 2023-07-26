@@ -9,38 +9,40 @@ import android.os.Environment
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.documentfile.provider.DocumentFile
-import com.example.natmisic.core.util.DataStoreKeys
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.model.Timestamp
 import com.example.natmisic.feature.domain.reposetory.Repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.runBlocking
 import java.io.File
 import java.io.FileOutputStream
 
 class UpdateAndGetBooks(
     private val repo: Repository,
     private val dataStore: DataStore<Preferences>,
+    private val context: Context
 ) {
-    suspend operator fun invoke(context: Context): Flow<List<Book>> {
+    suspend operator fun invoke(): Flow<List<Book>> {
 
-        val path =
-            runBlocking {
-                dataStore.data.map {
-                    it[DataStoreKeys.ROOT_FOLDER_KEY]
-                }.first()
-            } ?: ""
+        val path = context.contentResolver.persistedUriPermissions.firstOrNull()!!.uri.toString()
 
-        val uri = Uri.parse(path)
-        val documentFile = DocumentFile.fromTreeUri(context, uri)
-        val files = documentFile?.listFiles()?.filter { it.type?.startsWith("audio/") == true }
+        val documentFile = DocumentFile.fromTreeUri(context, Uri.parse(path))
+        val files = documentFile?.listFiles()?.filter { it.type?.startsWith("audio/") == true } // not getting files????
 
-        files?.forEach { file ->
-            val book = fileToBook(file, context)
-            if (repo.getBooks().first().none { it.name == book.name }) {
-                repo.insertBook(book)
+        val oldBooksInDB = repo.getBooks().first()
+        val newBooks = files?.map { fileToBook(it, context) }
+        repo.deleteAll()
+
+        newBooks?.forEach { b->
+            if (!oldBooksInDB.any { it.path == b.path }){
+                repo.insertBook(b)
+            }
+        }
+        oldBooksInDB.forEach { B ->
+            if (newBooks != null && newBooks.isNotEmpty()){
+                if (newBooks.any { B.path == it.path }){
+                    repo.insertBook(B)
+                }
             }
         }
 
@@ -58,7 +60,10 @@ class UpdateAndGetBooks(
         val cover = coverToPath(mediaMetadataRetriever.embeddedPicture, name ?: "", context)
 
         return Book(
-            path = Environment.getExternalStorageDirectory().absolutePath + file.uri.lastPathSegment?.replace("primary:","/"),
+            path = Environment.getExternalStorageDirectory().absolutePath + file.uri.lastPathSegment?.replace(
+                "primary:",
+                "/"
+            ),
             name = name ?: "",
             author = author ?: "",
             cover = cover ?: "",

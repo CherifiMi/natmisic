@@ -1,6 +1,5 @@
 package com.example.natmisic.feature.presentation.home
 
-import android.content.Context
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
@@ -11,7 +10,6 @@ import com.example.natmisic.feature.domain.use_case.UseCases
 import com.example.natmisic.feature.presentation.util.Screens
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -19,7 +17,6 @@ import javax.inject.Inject
 
 sealed class HomeEvent {
     data class OpenSettings(val navController: NavController) : HomeEvent()
-    data class Init(val context: Context) : HomeEvent()
 }
 
 data class HomeState(
@@ -35,21 +32,20 @@ class HomeViewModel @Inject constructor(
     private val _state = mutableStateOf(HomeState())
     val state: State<HomeState> = _state
 
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            useCase.updateAndGetBooks().first().let {
+                withContext(Dispatchers.Main) {
+                    _state.value = state.value.copy(books = it, loading = false)
+                }
+            }
+        }
+    }
 
     fun onEvent(event: HomeEvent) {
         when (event) {
             is HomeEvent.OpenSettings -> {
                 event.navController.navigate(Screens.SETTINGS.name)
-            }
-            is HomeEvent.Init -> {
-                viewModelScope.launch(Dispatchers.IO) {
-                    useCase.updateAndGetBooks(event.context).first().let {
-                        withContext(Dispatchers.Main) {
-                            delay(3000)
-                            _state.value = state.value.copy(books = it, loading = false)
-                        }
-                    }
-                }
             }
         }
     }

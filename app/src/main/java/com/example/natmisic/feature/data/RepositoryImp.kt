@@ -17,4 +17,8 @@ class RepositoryImp(private val dao: BookDao): Repository {
     override suspend fun insertBook(book: Book) {
         dao.insertBook(book)
     }
+
+    override fun deleteAll() {
+        dao.deleteAll()
+    }
 }

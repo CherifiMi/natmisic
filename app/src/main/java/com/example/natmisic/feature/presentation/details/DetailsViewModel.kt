@@ -3,6 +3,7 @@ package com.example.natmisic.feature.presentation.details
 import android.content.Context
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
+import android.util.Log
 import android.widget.Toast
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
@@ -16,6 +17,7 @@ import com.example.musicplayer.exoplayer.*
 import com.example.natmisic.core.exoplayer.MusicService
 import com.example.natmisic.core.util.Constants
 import com.example.natmisic.core.util.Resource
+import com.example.natmisic.core.util.TAG
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.model.Timestamp
 import com.example.natmisic.feature.domain.use_case.UseCases
@@ -44,8 +46,6 @@ sealed class DetailsEvent {
     data class PlayOrToggleSong(val mediaItem: Book, val toggle: Boolean = false) : DetailsEvent()
     object Back : DetailsEvent()
     object Skip : DetailsEvent()
-    object SkipToNextSong : DetailsEvent()
-    object SkipToPreviousSong : DetailsEvent()
     data class RecordAndSaveTranscript(
         val book: Book,
         val timestamp: String,
@@ -135,7 +135,7 @@ class DetailsViewModel @Inject constructor(
                             _state.value = state.value.copy(book = newBook)
                             Toast.makeText(
                                 context,
-                                "$startTime: $it",
+                                "${formatLong(startTime*1000)}: $it",
                                 Toast.LENGTH_SHORT
                             ).show()
                             viewModelScope.launch(Dispatchers.IO){
@@ -154,8 +154,6 @@ class DetailsViewModel @Inject constructor(
                     output.delete()
                 }
             }
-            is DetailsEvent.SkipToNextSong -> {}
-            is DetailsEvent.SkipToPreviousSong -> {}
             is DetailsEvent.ShowTimestampPopup -> {
                 _state.value = state.value.copy(popup = true, timestamp = event.item)
             }
@@ -240,15 +238,22 @@ class DetailsViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
+        musicServiceConnection.transportController.stop()
         musicServiceConnection.unsubscribe(
             Constants.MEDIA_ROOT_ID,
-            object : MediaBrowserCompat.SubscriptionCallback() {})
+            object : MediaBrowserCompat.SubscriptionCallback() {}
+        )
     }
 
     fun toBook(currentSong: MediaMetadataCompat): Book? {
         return currentSong.description.let {
             runBlocking(Dispatchers.IO) {
-                useCases.getBookById(it.mediaId!!.toInt())
+                try {
+                    useCases.getBookById(it.mediaId!!.toInt())
+                }catch (e: Exception){
+                    Log.d(TAG, e.message.toString())
+                    null
+                }
             }
         }
     }
@@ -340,7 +345,7 @@ class DetailsViewModel @Inject constructor(
                             author = it.description.subtitle.toString(),
                             cover = it.description.iconUri.toString(),
                             duration = MusicService.currentSongDuration.toInt(),
-                            progress = 0,
+                            progress = 9999,
                             timestamp = emptyList()
                         )
                     }
@@ -350,4 +355,6 @@ class DetailsViewModel @Inject constructor(
         )
     }
     // endregion
+
+
 }

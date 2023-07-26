@@ -7,4 +7,5 @@ interface Repository {
     fun getBooks(): Flow<List<Book>>
     suspend fun getBookById(id: Int): Book
     suspend fun insertBook(book: Book)
+    fun deleteAll()
 }

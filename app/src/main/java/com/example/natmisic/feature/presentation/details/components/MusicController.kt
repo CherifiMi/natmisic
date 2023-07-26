@@ -2,6 +2,7 @@ package com.example.natmisic.feature.presentation.details.components
 
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.OnBackPressedDispatcher
+import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
@@ -75,6 +76,7 @@ fun MusicController(
     Column(
         Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colors.primary)
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
@@ -89,7 +91,7 @@ fun MusicController(
                 fontSize = 11.sp
             )
             Text(
-                viewmodel.currentSongFormattedPosition,
+                viewmodel.formatLong(state.book?.duration?.toLong() ?: 0L),
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 11.sp
             )

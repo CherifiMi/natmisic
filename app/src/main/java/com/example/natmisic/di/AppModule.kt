@@ -51,11 +51,12 @@ object AppModule {
     @Singleton
     fun provideUseCases(
         dataStore: DataStore<Preferences>,
-        repository: Repository
+        repository: Repository,
+        @ApplicationContext context: Context
     ) = UseCases(
         getDataStoreItem = GetDataStoreItem(dataStore),
         setDataStoreItem = SetDataStoreItem(dataStore),
-        updateAndGetBooks = UpdateAndGetBooks(repository, dataStore),
+        updateAndGetBooks = UpdateAndGetBooks(repository, dataStore, context),
         getAllBooks = GetAllBooks(repository),
         getBookById = GetBookById(repository),
         updateBookById = UpdateBookById(repository)
