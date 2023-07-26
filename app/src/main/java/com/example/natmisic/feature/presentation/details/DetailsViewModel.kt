@@ -111,15 +111,11 @@ class DetailsViewModel @Inject constructor(
                 val book = event.book
                 val context = event.context
 
-                //val startTime = event.timestamp
-                //val endTime = formatLong(event.timestamp.toTimeDateLong() + 1000 * 10)
-
                 val input = File(book.path)
                 val output = File(context.cacheDir, "output${(0..999).random()}.wav")
 
                 val startTime = event.timestamp.toTimeDateLong() / 1000
                 val endTime = startTime + 10
-
 
                 _state.value = state.value.copy(prosessing = true)
 
