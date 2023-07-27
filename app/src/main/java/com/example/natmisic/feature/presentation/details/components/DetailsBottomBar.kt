@@ -93,7 +93,7 @@ fun DetailsBottomBar(
                     .background(Brush.verticalGradient(colorStops = colorStops)),
                 contentAlignment = Alignment.BottomCenter
             ) {
-                viewmodel.toBook(currentSong)?.let {
+                viewmodel.state.value.book?.let {
                     DetailsBottomBarItem(
                         book = it,
                         playbackStateCompat = playbackStateCompat,

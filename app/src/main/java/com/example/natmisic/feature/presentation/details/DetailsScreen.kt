@@ -35,6 +35,7 @@ fun DetailsScreen(
 ) {
     val state = viewmodel.state.value
     val book = state.book
+
     AnimatedVisibility(
         visible = book != null && viewmodel.showPlayerFullScreen,
         enter = slideInVertically(

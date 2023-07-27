@@ -49,6 +49,10 @@ fun HomeScreen(
         }
     }
 
+    LaunchedEffect(detailsViewModel.showPlayerFullScreen){
+        viewModel.onEvent(HomeEvent.UpdateState)
+    }
+
     val state = viewModel.state.value
 
 

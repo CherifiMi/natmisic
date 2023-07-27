@@ -7,16 +7,18 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaControllerCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import com.example.natmisic.core.exoplayer.MusicService
 import com.example.natmisic.core.util.Constants.NETWORK_FAILURE
 import com.example.natmisic.core.util.Event
 import com.example.natmisic.core.util.Resource
-import com.example.natmisic.core.exoplayer.MusicService
+import com.example.natmisic.core.util.TAG
 
 class MusicServiceConnection(
-    context: Context
+    val context: Context
 ) {
     private val _isConnected = MutableLiveData<Event<Resource<Boolean>>>()
     val isConnected: LiveData<Event<Resource<Boolean>>> = _isConnected
@@ -49,10 +51,12 @@ class MusicServiceConnection(
     ).apply { connect() }
 
     fun subscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback) {
+        Log.d(TAG, "sub")
         mediaBrowser.subscribe(parentId, callback)
     }
 
     fun unsubscribe(parentId: String, callback: MediaBrowserCompat.SubscriptionCallback) {
+        Log.d(TAG, "unsub")
         mediaBrowser.unsubscribe(parentId, callback)
     }
 

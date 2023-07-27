@@ -10,6 +10,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.MediaSessionCompat
+import android.util.Log
 import androidx.media.MediaBrowserServiceCompat
 import com.example.musicplayer.exoplayer.MusicNotificationManger
 import com.example.musicplayer.exoplayer.MusicSource
@@ -56,14 +57,16 @@ class MusicService : MediaBrowserServiceCompat() {
     private lateinit var musicPlayerListener: MusicPlayerEventListener
 
     companion object {
-        private const val TAG = "MediaPlayerService"
-
         var currentSongDuration = 0L
             private set
-    }
 
+    }
+    init {
+        Log.d(com.example.natmisic.core.util.TAG, "init")
+    }
     override fun onCreate() {
         super.onCreate()
+        exoPlayer.clearMediaItems()
         serviceScope.launch {
             musicSource.fetchMediaData()
         }
@@ -84,7 +87,6 @@ class MusicService : MediaBrowserServiceCompat() {
                     PendingIntent.FLAG_ONE_SHOT
                 )
             }
-            //PendingIntent.getActivity(this, 0, it, 0)
         }
 
         mediaSessionCompat = MediaSessionCompat(this, SERVICE_TAG).apply {
@@ -146,6 +148,7 @@ class MusicService : MediaBrowserServiceCompat() {
 
     override fun onDestroy() {
         super.onDestroy()
+        exoPlayer.clearMediaItems()
         serviceScope.cancel()
         exoPlayer.removeListener(musicPlayerListener)
         exoPlayer.release()

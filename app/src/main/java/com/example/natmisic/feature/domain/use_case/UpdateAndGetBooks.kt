@@ -6,9 +6,11 @@ import android.graphics.BitmapFactory
 import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.os.Environment
+import android.util.Log
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.documentfile.provider.DocumentFile
+import com.example.natmisic.core.util.TAG
 import com.example.natmisic.feature.domain.model.Book
 import com.example.natmisic.feature.domain.model.Timestamp
 import com.example.natmisic.feature.domain.reposetory.Repository
@@ -23,6 +25,8 @@ class UpdateAndGetBooks(
     private val context: Context
 ) {
     suspend operator fun invoke(): Flow<List<Book>> {
+
+        Log.d(TAG, "2")
 
         val path = context.contentResolver.persistedUriPermissions.firstOrNull()!!.uri.toString()
 

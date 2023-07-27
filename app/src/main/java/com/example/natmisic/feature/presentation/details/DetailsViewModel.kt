@@ -1,7 +1,6 @@
 package com.example.natmisic.feature.presentation.details
 
 import android.content.Context
-import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.util.Log
 import android.widget.Toast
@@ -62,7 +61,7 @@ sealed class DetailsEvent {
 @HiltViewModel
 class DetailsViewModel @Inject constructor(
     private val musicServiceConnection: MusicServiceConnection,
-    private val useCases: UseCases
+    private val useCases: UseCases,
 ) : ViewModel() {
 
     private val _state = mutableStateOf(DetailsState())
@@ -71,14 +70,14 @@ class DetailsViewModel @Inject constructor(
     fun onEvent(event: DetailsEvent) {
         when (event) {
             is DetailsEvent.PlayOrToggleSong -> {
-                val mediaItem = event.mediaItem
+                val book = event.mediaItem
                 val toggle = event.toggle
 
-                updateCurrentBookState(mediaItem.id!!)
+                updateCurrentBookState(book.id!!)
                 val isPrepared = playbackState.value?.isPrepared ?: false
-                if (isPrepared && mediaItem.id.toString() ==
-                    currentPlayingSong.value?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID)
-                ) {
+                val isSameBook = book.name == (state.value.book?.name
+                    ?: "")
+                if (isPrepared && isSameBook) {
                     playbackState.value?.let { playbackState ->
                         when {
                             playbackState.isPlaying -> {
@@ -92,9 +91,14 @@ class DetailsViewModel @Inject constructor(
                     }
                 } else {
                     musicServiceConnection.transportController.playFromMediaId(
-                        mediaItem.id.toString(),
+                        book.id.toString(),
                         null
                     )
+                    musicServiceConnection.transportController.play()
+                    Log.d(TAG, book.toString())
+                    Log.d(TAG, currentPlayingSong.value?.getString(MediaMetadataCompat.METADATA_KEY_DISPLAY_TITLE).toString())
+                    Log.d(TAG, currentPlayingSong.value?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_ID).toString())
+                    Log.d(TAG, currentPlayingSong.value?.getString(MediaMetadataCompat.METADATA_KEY_MEDIA_URI).toString())
                 }
             }
             is DetailsEvent.Skip -> {
@@ -121,7 +125,8 @@ class DetailsViewModel @Inject constructor(
 
                 viewModelScope.launch(Dispatchers.IO) {
 
-                    val sliceAndConvert = FFmpegKit.execute("-i '${input.path}' -ss $startTime -to $endTime -c pcm_s16le -ac 1 -ar 16000 ${output.path}")
+                    val sliceAndConvert =
+                        FFmpegKit.execute("-i '${input.path}' -ss $startTime -to $endTime -c pcm_s16le -ac 1 -ar 16000 ${output.path}")
 
                     if (ReturnCode.isSuccess(sliceAndConvert.returnCode)) {
                         recognizeFile(output.inputStream(), event.context) {
@@ -129,16 +134,16 @@ class DetailsViewModel @Inject constructor(
                                 timestamp = book.timestamp + Timestamp(
                                     id = book.id!!,
                                     it,
-                                    formatLong(startTime*1000)
+                                    formatLong(startTime * 1000)
                                 )
                             )
                             _state.value = state.value.copy(book = newBook)
                             Toast.makeText(
                                 context,
-                                "${formatLong(startTime*1000)}: $it",
+                                "${formatLong(startTime * 1000)}: $it",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            viewModelScope.launch(Dispatchers.IO){
+                            viewModelScope.launch(Dispatchers.IO) {
                                 useCases.updateBookById(newBook)
                             }
                         }
@@ -221,7 +226,7 @@ class DetailsViewModel @Inject constructor(
         val mm = this.slice((3..4)).toLong()
         val ss = this.slice((6..7)).toLong()
 
-        return  (HH*3600 + mm*60 + ss) * 1000
+        return (HH * 3600 + mm * 60 + ss) * 1000
     }
 
     fun skipToNextSong() {
@@ -236,21 +241,14 @@ class DetailsViewModel @Inject constructor(
         musicServiceConnection.transportController.seekTo(pos.toLong())
     }
 
-    override fun onCleared() {
-        super.onCleared()
-        musicServiceConnection.transportController.stop()
-        musicServiceConnection.unsubscribe(
-            Constants.MEDIA_ROOT_ID,
-            object : MediaBrowserCompat.SubscriptionCallback() {}
-        )
-    }
+
 
     fun toBook(currentSong: MediaMetadataCompat): Book? {
         return currentSong.description.let {
             runBlocking(Dispatchers.IO) {
                 try {
                     useCases.getBookById(it.mediaId!!.toInt())
-                }catch (e: Exception){
+                } catch (e: Exception) {
                     Log.d(TAG, e.message.toString())
                     null
                 }
@@ -296,6 +294,7 @@ class DetailsViewModel @Inject constructor(
     //endregion
 
     // region exoplyer
+
     var currentPlaybackPosition by mutableStateOf(0L)
 
     val currentPlayerPosition: Float
@@ -316,7 +315,6 @@ class DetailsViewModel @Inject constructor(
     val currentSongDuration: Long
         get() = MusicService.currentSongDuration
 
-    var mediaItems = mutableStateOf<Resource<List<Book>>>(Resource.Loading(null))
 
     var showPlayerFullScreen by mutableStateOf(false)
 
@@ -326,34 +324,6 @@ class DetailsViewModel @Inject constructor(
         get() = playbackState.value?.isPlaying == true
 
     val playbackState = musicServiceConnection.playbackState
-
-    init {
-        mediaItems.value = (Resource.Loading(null))
-        musicServiceConnection.subscribe(
-            Constants.MEDIA_ROOT_ID,
-            object : MediaBrowserCompat.SubscriptionCallback() {
-                override fun onChildrenLoaded(
-                    parentId: String,
-                    children: MutableList<MediaBrowserCompat.MediaItem>
-                ) {
-                    super.onChildrenLoaded(parentId, children)
-                    val items = children.map {
-                        Book(
-                            id = it.mediaId!!.toInt(),
-                            path = it.description.mediaUri.toString(),
-                            name = it.description.title.toString(),
-                            author = it.description.subtitle.toString(),
-                            cover = it.description.iconUri.toString(),
-                            duration = MusicService.currentSongDuration.toInt(),
-                            progress = 9999,
-                            timestamp = emptyList()
-                        )
-                    }
-                    mediaItems.value = Resource.Success(items)
-                }
-            }
-        )
-    }
     // endregion
 
 

@@ -74,7 +74,6 @@ fun BookItem(book: Book, detailsViewModel: DetailsViewModel) {
                     maxLines = 2,
                     overflow = TextOverflow.Ellipsis,
                 )
-
                 Text(
                     book.author,
                     fontSize = 13.sp,
